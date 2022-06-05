@@ -13,7 +13,9 @@ public extension WebLeopard {
     func put<T, D>(endpoint: String,
                    body: D) async throws -> T where T:Codable, D:Codable {
         
-        guard var request = try createLeopardRequest("PUT", endpoint: endpoint, isJSON: true) else {
+        guard var request = try createRequest("PUT",
+                                                     endpoint: endpoint,
+                                                     isJSON: true) else {
             throw WebLeopardError.unableToMakeRequest
         }
         
@@ -26,7 +28,7 @@ public extension WebLeopard {
             throw HttpError(res.statusCode)
         }
             
-        return try Coder<T>.decode(data)
+        return try Coder.decode(data)
     }
     
 }

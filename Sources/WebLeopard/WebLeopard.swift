@@ -6,9 +6,9 @@ public protocol WebLeopard {
     var token: String { get }
 }
 
-public extension WebLeopard {
+extension WebLeopard {
     
-    func createLeopardRequest(_ method: String,
+    func createRequest(_ method: String,
                               endpoint: String,
                               queryItems: [URLQueryItem] = [],
                               isJSON: Bool = false) throws -> URLRequest? {

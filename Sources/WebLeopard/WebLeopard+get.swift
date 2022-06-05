@@ -12,7 +12,7 @@ public extension WebLeopard {
         
     func get<T>(endpoint: String) async throws -> T where T:Codable {
         
-        guard let request = try createLeopardRequest("GET", endpoint: endpoint) else {
+        guard let request = try createRequest("GET", endpoint: endpoint) else {
             throw WebLeopardError.unableToMakeRequest
         }
         
@@ -23,13 +23,13 @@ public extension WebLeopard {
             throw HttpError(res.statusCode)
         }
         
-        return try Coder<T>.decode(data)
+        return try Coder.decode(data)
     }
     
     func get<T>(endpoint: String,
                 queryItems: [URLQueryItem]) async throws -> T where T:Codable {
         
-        guard let request = try createLeopardRequest("GET",
+        guard let request = try createRequest("GET",
                                                      endpoint: endpoint,
                                                      queryItems: queryItems) else {
             throw WebLeopardError.unableToMakeRequest
@@ -42,7 +42,7 @@ public extension WebLeopard {
             throw HttpError(res.statusCode)
         }
         
-        return try Coder<T>.decode(data)
+        return try Coder.decode(data)
     }
     
 }

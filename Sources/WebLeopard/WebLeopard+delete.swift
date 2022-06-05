@@ -12,7 +12,7 @@ public extension WebLeopard {
 
     func delete(endpoint: String) async throws -> Void {
         
-        guard let request = try createLeopardRequest("DELETE", endpoint: endpoint) else {
+        guard let request = try createRequest("DELETE", endpoint: endpoint) else {
             throw WebLeopardError.unableToMakeRequest
         }
         
@@ -27,7 +27,7 @@ public extension WebLeopard {
     func delete(endpoint: String,
                 queryItems: [URLQueryItem]) async throws -> Void {
         
-        guard let request = try createLeopardRequest("DELETE",
+        guard let request = try createRequest("DELETE",
                                                      endpoint: endpoint,
                                                      queryItems: queryItems) else {
             throw WebLeopardError.unableToMakeRequest

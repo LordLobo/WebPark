@@ -15,19 +15,19 @@ public extension WebLeopard {
         
         guard var urlComponents = URLComponents(string: self.baseURL + endpoint)
         else {
-            throw RESTLeopardError.unableToMakeURL
+            throw WebLeopardError.unableToMakeURL
         }
         
         if queryItems.hasItems {
             urlComponents.queryItems = queryItems
         }
         
-        guard let url = urlComponents.url else { throw RESTLeopardError.unableToMakeURL}
+        guard let url = urlComponents.url else { throw WebLeopardError.unableToMakeURL}
         
         var request = URLRequest(url: url)
         request.httpMethod = method
         
-        if !token.isEmpty {
+        if token.count > 0 {
             request = request.addingBearerAuthorization(token: token)
         }
         
@@ -40,7 +40,7 @@ public extension WebLeopard {
     
 }
 
-public enum RESTLeopardError: Error {
+public enum WebLeopardError: Error {
     case unableToMakeURL
     case unableToMakeRequest
     case decodeFailure

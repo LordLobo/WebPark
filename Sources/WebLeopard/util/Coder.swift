@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 public class Coder<T: Codable> {
     public static func encode(_ data: T) throws -> Data {
         do {

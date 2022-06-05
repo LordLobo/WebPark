@@ -10,10 +10,10 @@ import Foundation
 @available(macOS 12.0, *)
 public extension WebLeopard {
         
-    func get<T>(endpoint: String) async throws -> T where T:Decodable {
+    func get<T>(endpoint: String) async throws -> T where T:Codable {
         
         guard let request = try createLeopardRequest("GET", endpoint: endpoint) else {
-            throw RESTLeopardError.unableToMakeRequest
+            throw WebLeopardError.unableToMakeRequest
         }
         
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -23,21 +23,16 @@ public extension WebLeopard {
             throw HttpError(res.statusCode)
         }
         
-        do {
-            let decoded = try JSONDecoder().decode(T.self, from: data)
-            return decoded
-        } catch {
-            throw RESTLeopardError.decodeFailure
-        }
+        return try Coder<T>.decode(data)
     }
     
     func get<T>(endpoint: String,
-                queryItems: [URLQueryItem]) async throws -> T where T:Decodable {
+                queryItems: [URLQueryItem]) async throws -> T where T:Codable {
         
         guard let request = try createLeopardRequest("GET",
                                                      endpoint: endpoint,
                                                      queryItems: queryItems) else {
-            throw RESTLeopardError.unableToMakeRequest
+            throw WebLeopardError.unableToMakeRequest
         }
         
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -47,12 +42,7 @@ public extension WebLeopard {
             throw HttpError(res.statusCode)
         }
         
-        do {
-            let decoded = try JSONDecoder().decode(T.self, from: data)
-            return decoded
-        } catch {
-            throw RESTLeopardError.decodeFailure
-        }
+        return try Coder<T>.decode(data)
     }
     
 }

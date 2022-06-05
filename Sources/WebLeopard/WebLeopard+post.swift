@@ -14,14 +14,10 @@ public extension WebLeopard {
                     body: D) async throws -> T where T:Codable, D:Codable {
         
         guard var request = try createLeopardRequest("POST", endpoint: endpoint, isJSON: true) else {
-            throw RESTLeopardError.unableToMakeRequest
+            throw WebLeopardError.unableToMakeRequest
         }
         
-        do {
-            request.httpBody = try Coder.encode(body)
-        } catch {
-            throw RESTLeopardError.encodeFailure
-        }
+        request.httpBody = try Coder.encode(body)
                 
         let (data, response) = try await URLSession.shared.data(for: request)
         
@@ -30,12 +26,7 @@ public extension WebLeopard {
             throw HttpError(res.statusCode)
         }
             
-        do {
-            let decoded = try Coder<T>.decode(data)
-            return decoded
-        } catch {
-            throw RESTLeopardError.decodeFailure
-        }
+        return try Coder<T>.decode(data)
     }
     
 }

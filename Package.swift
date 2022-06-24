@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "WebLeopard",
+    name: "WebPark",
     platforms: [
         .macOS(.v12),
         .iOS(.v15),
@@ -11,17 +11,17 @@ let package = Package(
     ],
     products: [
         .library(
-            name: "WebLeopard",
-            targets: ["WebLeopard"]),
+            name: "WebPark",
+            targets: ["WebPark"]),
     ],
     dependencies: [
     ],
     targets: [
         .target(
-            name: "WebLeopard",
+            name: "WebPark",
             dependencies: []),
         .testTarget(
-            name: "WebLeopardTests",
-            dependencies: ["WebLeopard"]),
+            name: "WebParkTests",
+            dependencies: ["WebPark"]),
     ]
 )

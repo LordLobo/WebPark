@@ -1,5 +1,5 @@
 //
-//  WebLeopard+post.swift
+//  WebPark+put.swift
 //  
 //
 //  Created by Daniel Giralte on 6/5/22.
@@ -8,19 +8,19 @@
 import Foundation
 
 @available(macOS 12.0, *)
-public extension WebLeopard {
+public extension WebPark {
     
-    func post<T, D>(endpoint: String,
-                    body: D) async throws -> T where T:Codable, D:Codable {
+    func put<T, D>(endpoint: String,
+                   body: D) async throws -> T where T:Codable, D:Codable {
         
-        guard var request = try createRequest("POST",
+        guard var request = try createRequest("PUT",
                                                      endpoint: endpoint,
                                                      isJSON: true) else {
-            throw WebLeopardError.unableToMakeRequest
+            throw WebParkError.unableToMakeRequest
         }
         
         request.httpBody = try Coder.encode(body)
-                
+        
         let (data, response) = try await URLSession.shared.data(for: request)
         
         if let res = response as? HTTPURLResponse,

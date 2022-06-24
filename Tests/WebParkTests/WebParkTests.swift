@@ -1,12 +1,12 @@
 import XCTest
-@testable import WebLeopard
+@testable import WebPark
 
-public struct lSut : WebLeopard {
+public struct lSut : WebPark {
     public var baseURL: String
     public var token: String
 }
 
-final class WebLeopardTests: XCTestCase {
+final class WebParkTests: XCTestCase {
     func test__createRequest__given_valid_request__returns_request() throws {
         let sut = lSut(baseURL: "http://google.com/", token: "")
         

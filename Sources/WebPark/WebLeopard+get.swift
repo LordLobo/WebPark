@@ -1,5 +1,5 @@
 //
-//  WebLeopard+get.swift
+//  WebPark+get.swift
 //  
 //
 //  Created by Daniel Giralte on 6/5/22.
@@ -8,12 +8,12 @@
 import Foundation
 
 @available(macOS 12.0, *)
-public extension WebLeopard {
+public extension WebPark {
         
     func get<T>(endpoint: String) async throws -> T where T:Codable {
         
         guard let request = try createRequest("GET", endpoint: endpoint) else {
-            throw WebLeopardError.unableToMakeRequest
+            throw WebParkError.unableToMakeRequest
         }
         
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -32,7 +32,7 @@ public extension WebLeopard {
         guard let request = try createRequest("GET",
                                                      endpoint: endpoint,
                                                      queryItems: queryItems) else {
-            throw WebLeopardError.unableToMakeRequest
+            throw WebParkError.unableToMakeRequest
         }
         
         let (data, response) = try await URLSession.shared.data(for: request)

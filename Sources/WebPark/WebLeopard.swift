@@ -1,12 +1,12 @@
 import Foundation
 
 /// 
-public protocol WebLeopard {
+public protocol WebPark {
     var baseURL: String { get }
     var token: String { get }
 }
 
-extension WebLeopard {
+extension WebPark {
     
     func createRequest(_ method: String,
                               endpoint: String,
@@ -15,14 +15,14 @@ extension WebLeopard {
         
         guard var urlComponents = URLComponents(string: self.baseURL + endpoint)
         else {
-            throw WebLeopardError.unableToMakeURL
+            throw WebParkError.unableToMakeURL
         }
         
         if queryItems.hasItems {
             urlComponents.queryItems = queryItems
         }
         
-        guard let url = urlComponents.url else { throw WebLeopardError.unableToMakeURL}
+        guard let url = urlComponents.url else { throw WebParkError.unableToMakeURL}
         
         var request = URLRequest(url: url)
         request.httpMethod = method
@@ -40,7 +40,7 @@ extension WebLeopard {
     
 }
 
-public enum WebLeopardError: Error {
+public enum WebParkError: Error {
     case unableToMakeURL
     case unableToMakeRequest
     case decodeFailure

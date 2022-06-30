@@ -10,7 +10,7 @@ import Foundation
 @available(macOS 12.0, *)
 public extension WebPark {
     
-    func post<T, D>(endpoint: String,
+    func post<T, D>(_ endpoint: String,
                     body: D) async throws -> T where T:Codable, D:Codable {
         
         guard var request = try createRequest("POST",

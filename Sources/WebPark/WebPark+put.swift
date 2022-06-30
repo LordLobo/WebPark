@@ -1,5 +1,5 @@
 //
-//  WebPark+patch.swift
+//  WebPark+put.swift
 //  
 //
 //  Created by Daniel Giralte on 6/5/22.
@@ -10,10 +10,10 @@ import Foundation
 @available(macOS 12.0, *)
 public extension WebPark {
     
-    func patch<T, D>(endpoint: String,
-                     body: D) async throws -> T where T:Codable, D: Codable {
+    func put<T, D>(_ endpoint: String,
+                   body: D) async throws -> T where T:Codable, D:Codable {
         
-        guard var request = try createRequest("PATCH",
+        guard var request = try createRequest("PUT",
                                                      endpoint: endpoint,
                                                      isJSON: true) else {
             throw WebParkError.unableToMakeRequest

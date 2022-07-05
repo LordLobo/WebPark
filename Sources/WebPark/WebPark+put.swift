@@ -25,7 +25,7 @@ public extension WebPark {
         
         if let res = response as? HTTPURLResponse,
            res.statusCode > 400 {
-            throw HttpError(res.statusCode)
+            throw WebParkHttpError(res.statusCode)
         }
             
         return try Coder.decode(data)

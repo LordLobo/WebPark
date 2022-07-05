@@ -48,7 +48,7 @@ public enum WebParkError: Error {
     case encodeFailure
 }
 
-public enum ErrorResponseCodes: Int {
+public enum ErrorResponseCode: Int {
     case unauthorized = 401
     case notFound = 404
     case internalServerError = 500
@@ -59,11 +59,11 @@ public enum ErrorResponseCodes: Int {
     case unhandledResponseCode = 0
 }
 
-public class HttpError: Error {
-    public var httpError: ErrorResponseCodes
+public struct WebParkHttpError: Error {
+    public var httpError: ErrorResponseCode
     
     public init(_ withError: Int) {
-        httpError = ErrorResponseCodes(rawValue: withError) ?? .unhandledResponseCode
+        httpError = ErrorResponseCode(rawValue: withError) ?? .unhandledResponseCode
     }
 }
 

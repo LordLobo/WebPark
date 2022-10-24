@@ -3,6 +3,8 @@ import Foundation
 /// 
 public protocol WebPark {
     var baseURL: String { get }
+    
+    // possible fix for token refresh - token service that catches 401s
     var token: String { get }
 }
 

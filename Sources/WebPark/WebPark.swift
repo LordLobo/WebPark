@@ -3,15 +3,19 @@ import Foundation
 /// 
 public protocol WebPark {
     var baseURL: String { get }
+    
+    // possible fix for token refresh - token service that catches 401s
     var token: String { get }
+    
+    func refreshToken()
 }
 
 extension WebPark {
     
-    func createRequest(_ method: String,
-                       endpoint: String,
-                       queryItems: [URLQueryItem] = [],
-                       isJSON: Bool = false) throws -> URLRequest? {
+    internal func createRequest(_ method: String,
+                                endpoint: String,
+                                queryItems: [URLQueryItem] = [],
+                                isJSON: Bool = false) throws -> URLRequest? {
         
         guard var urlComponents = URLComponents(string: self.baseURL + endpoint)
         else {
@@ -36,8 +40,7 @@ extension WebPark {
         }
         
         return request
-    }
-    
+    }    
 }
 
 public enum WebParkError: Error {

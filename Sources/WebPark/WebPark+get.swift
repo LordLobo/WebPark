@@ -30,8 +30,8 @@ public extension WebPark {
                 queryItems: [URLQueryItem]) async throws -> T where T:Codable {
         
         guard let request = try createRequest("GET",
-                                                     endpoint: endpoint,
-                                                     queryItems: queryItems) else {
+                                              endpoint: endpoint,
+                                              queryItems: queryItems) else {
             throw WebParkError.unableToMakeRequest
         }
         

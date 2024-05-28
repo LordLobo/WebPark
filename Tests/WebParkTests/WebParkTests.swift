@@ -2,6 +2,10 @@ import XCTest
 @testable import WebPark
 
 public struct lSut : WebPark {
+    public func refreshToken() {
+        
+    }
+    
     public var baseURL: String
     public var token: String
 }
@@ -14,4 +18,6 @@ final class WebParkTests: XCTestCase {
         
         XCTAssertNotNil(result)
     }
+    
+    
 }

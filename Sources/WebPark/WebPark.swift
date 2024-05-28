@@ -6,14 +6,16 @@ public protocol WebPark {
     
     // possible fix for token refresh - token service that catches 401s
     var token: String { get }
+    
+    func refreshToken()
 }
 
 extension WebPark {
     
-    func createRequest(_ method: String,
-                       endpoint: String,
-                       queryItems: [URLQueryItem] = [],
-                       isJSON: Bool = false) throws -> URLRequest? {
+    internal func createRequest(_ method: String,
+                                endpoint: String,
+                                queryItems: [URLQueryItem] = [],
+                                isJSON: Bool = false) throws -> URLRequest? {
         
         guard var urlComponents = URLComponents(string: self.baseURL + endpoint)
         else {
@@ -38,8 +40,7 @@ extension WebPark {
         }
         
         return request
-    }
-    
+    }    
 }
 
 public enum WebParkError: Error {

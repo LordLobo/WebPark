@@ -7,10 +7,13 @@ public protocol WebPark {
     // possible fix for token refresh - token service that catches 401s
     var token: String { get }
     
+    var urlSession: URLSession { get }
+    
     func refreshToken()
 }
 
 extension WebPark {
+    var urlSession: URLSession { URLSession.shared }
     
     internal func createRequest(_ method: String,
                                 endpoint: String,

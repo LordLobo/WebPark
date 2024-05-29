@@ -13,6 +13,7 @@ public class Coder<T: Codable> {
             let ret = try JSONEncoder().encode(data)
             return ret
         } catch {
+            // print(error) - use for debugging
             throw JSONCodingError.encodingError
         }
     }
@@ -22,6 +23,7 @@ public class Coder<T: Codable> {
             let ret = try JSONDecoder().decode(T.self, from: data)
             return ret
         } catch {
+            // print(error) - use for debugging
             throw JSONCodingError.decodingError
         }
     }

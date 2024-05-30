@@ -13,8 +13,8 @@ struct MockCat: Codable {
     var color: String
 }
 
-struct MockREST: WebPark {
-    var urlSession = BuildURLSession()
+struct Implementation: WebPark {
+    var urlSession: URLSession
     
     func refreshToken() {
         
@@ -30,7 +30,6 @@ func BuildURLSession() -> URLSession {
                                    statusCode: 200,
                                    httpVersion: nil,
                                    headerFields: ["Content-Type": "application/json"])!
-    
     let error: Error? = nil
     let data =
         """
@@ -50,13 +49,13 @@ func BuildURLSession() -> URLSession {
         getMockURL: (error, data, response)
     ]
             
-    let sess = URLSessionConfiguration.ephemeral
-    sess.protocolClasses = [URLProtocolMock.self]
+    let session = URLSessionConfiguration.ephemeral
+    session.protocolClasses = [URLProtocolMock.self]
     
-    return URLSession(configuration: sess)
+    return URLSession(configuration: session)
 }
 
-extension MockREST {
+extension Implementation {
     func getCats() async throws -> [MockCat] {
         return try await get("/cats")
     }

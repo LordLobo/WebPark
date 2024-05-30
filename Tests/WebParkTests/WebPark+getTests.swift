@@ -9,9 +9,9 @@ import Foundation
 import XCTest
 @testable import WebPark
 
-final class WebPark_get_Tests: XCTestCase {    
+final class WebPark_get_Tests: XCTestCase {
     func test__get__given_no_query_items__returns_data() async throws {
-        let sut = MockREST()
+        let sut = Implementation(urlSession: BuildURLSession())
         
         let val = try await sut.getCats()
         

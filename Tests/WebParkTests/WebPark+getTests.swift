@@ -29,7 +29,7 @@ final class WebPark_get_Tests: XCTestCase {
     func test__get__given_unauthorized__throws_with_401() async throws {
         let sut = Implementation(urlSession: BuildGETURLSession())
         do {
-            let val = try await sut.getCats401()
+            _ = try await sut.getCats401()
         } catch {
             let err = error as! WebParkHttpError
             XCTAssert(err.httpError == ErrorResponseCode.unauthorized)

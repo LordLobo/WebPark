@@ -39,8 +39,6 @@ func BuildGETURLSession() -> URLSession {
         ]
         """.data(using: .utf8)
     
-   
-    
     URLProtocolMock.mockURLs = [
         getMockBaseGETURL: (noError, data, response200),
         getMockQueryGETURL: (noError, data, response200),

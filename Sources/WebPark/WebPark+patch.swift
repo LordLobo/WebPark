@@ -14,20 +14,20 @@ public extension WebPark {
                      body: D) async throws -> T where T:Codable, D: Codable {
         
         guard var request = try createRequest("PATCH",
-                                                     endpoint: endpoint,
-                                                     isJSON: true) else {
+                                              endpoint: endpoint,
+                                              isJSON: true) else {
             throw WebParkError.unableToMakeRequest
         }
         
         request.httpBody = try Coder.encode(body)
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await urlSession.data(for: request)
         
         if let res = response as? HTTPURLResponse,
            res.statusCode > 400 {
             throw WebParkHttpError(res.statusCode)
         }
-            
+        
         return try Coder.decode(data)
     }
     

@@ -6,14 +6,13 @@ Using generics and Swift Concurrency, WebPark provides a simple set of HTTP inte
 
 ## Usage
 
-Extend the `WebPark` protocol and add a `baseURL`. Optionally add a JWT Token:
+Implement the `WebPark` protocol and add a `baseURL`.
 
 ```
 import WebPark
 
 struct myREST : WebPark {
-    let baseURL = "https://google.com"
-    let token = "myJWT"
+    let baseURL = "https://mydataendpoint.com"
 }
 ```
 
@@ -32,6 +31,23 @@ extention myREST {
     func getMyData() async throws -> MyData {
         return await get("/endpointForMyData")
     }
+}
+```
+
+If the web service requres tokens, create an implementation of `WebParkTokenServiceProtocol`, and include it in your WebPark struct.
+
+```
+struct MyTokenService: WebParkTokenServiceProtocol {
+    var token: String
+    
+    func refreshToken() async throws {
+        // refresh token code
+    }
+}
+
+struct myREST : WebPark {
+    let baseURL = "https://google.com"
+    let tokenService = MyTokenService()
 }
 ```
 

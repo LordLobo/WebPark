@@ -1,16 +1,30 @@
+//
+//  WebPark.swift
+//
+//
+//  Created by Daniel Giralte on 6/5/22.
+//
+
 import Foundation
 
 /// 
 public protocol WebPark {
     var baseURL: String { get }
     
+    var urlSession: URLSession { get }
+    
     // possible fix for token refresh - token service that catches 401s
+    var tokenService: WebParkTokenServiceProtocol? { get }
+}
+
+public protocol WebParkTokenServiceProtocol {
     var token: String { get }
     
-    func refreshToken()
+    func refreshToken() async throws
 }
 
 extension WebPark {
+    var urlSession: URLSession { URLSession.shared }
     
     internal func createRequest(_ method: String,
                                 endpoint: String,
@@ -31,8 +45,8 @@ extension WebPark {
         var request = URLRequest(url: url)
         request.httpMethod = method
         
-        if token.count > 0 {
-            request = request.addingBearerAuthorization(token: token)
+        if let tokenService {
+            request = request.addingBearerAuthorization(token: tokenService.token)
         }
         
         if isJSON {

@@ -16,7 +16,7 @@ public extension WebPark {
             throw WebParkError.unableToMakeRequest
         }
         
-        let (_, response) = try await URLSession.shared.data(for: request)
+        let (_, response) = try await urlSession.data(for: request)
         
         if let res = response as? HTTPURLResponse,
            res.statusCode > 400 {
@@ -28,12 +28,12 @@ public extension WebPark {
                 queryItems: [URLQueryItem]) async throws -> Void {
         
         guard let request = try createRequest("DELETE",
-                                                     endpoint: endpoint,
-                                                     queryItems: queryItems) else {
+                                              endpoint: endpoint,
+                                              queryItems: queryItems) else {
             throw WebParkError.unableToMakeRequest
         }
         
-        let (_, response) = try await URLSession.shared.data(for: request)
+        let (_, response) = try await urlSession.data(for: request)
         
         if let res = response as? HTTPURLResponse,
            res.statusCode > 400 {

@@ -16,7 +16,7 @@ public extension WebPark {
             throw WebParkError.unableToMakeRequest
         }
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await urlSession.data(for: request)
         
         if let res = response as? HTTPURLResponse,
            res.statusCode > 400 {
@@ -35,7 +35,7 @@ public extension WebPark {
             throw WebParkError.unableToMakeRequest
         }
         
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await urlSession.data(for: request)
         
         if let res = response as? HTTPURLResponse,
            res.statusCode > 400 {

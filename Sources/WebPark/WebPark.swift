@@ -11,12 +11,16 @@ import Foundation
 public protocol WebPark {
     var baseURL: String { get }
     
-    // possible fix for token refresh - token service that catches 401s
-    var token: String { get }
-    
     var urlSession: URLSession { get }
     
-    func refreshToken()
+    // possible fix for token refresh - token service that catches 401s
+    var tokenService: WebParkTokenServiceProtocol? { get }
+}
+
+public protocol WebParkTokenServiceProtocol {
+    var token: String { get }
+    
+    func refreshToken() async throws
 }
 
 extension WebPark {
@@ -41,8 +45,8 @@ extension WebPark {
         var request = URLRequest(url: url)
         request.httpMethod = method
         
-        if token.count > 0 {
-            request = request.addingBearerAuthorization(token: token)
+        if let tokenService {
+            request = request.addingBearerAuthorization(token: tokenService.token)
         }
         
         if isJSON {

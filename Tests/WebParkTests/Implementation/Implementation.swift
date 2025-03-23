@@ -13,12 +13,20 @@ struct Cat: Codable {
     var color: String
 }
 
-struct Implementation: WebPark {
-    func refreshToken() {
+struct testTokenService: WebParkTokenServiceProtocol {
+    var token = "token"
+    
+    func refreshToken() async throws {
         
     }
+}
+
+struct Implementation: WebPark {
+    var tokenService: (any WebParkTokenServiceProtocol)?
     
     var baseURL =  "https://lordlobo.mockapi.com"
     var token =  "token"
     var urlSession: URLSession
 }
+
+

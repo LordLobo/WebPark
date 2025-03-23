@@ -11,7 +11,8 @@ import XCTest
 
 final class WebPark_get_Tests: XCTestCase {
     func test__get__given_no_query_items__returns_data() async throws {
-        let sut = Implementation(urlSession: BuildGETURLSession())
+        let sut = Implementation(tokenService: testTokenService(),
+                                 urlSession: BuildGETURLSession())
         
         let val = try await sut.getCats()
         
@@ -19,7 +20,8 @@ final class WebPark_get_Tests: XCTestCase {
     }
     
     func test__get__given_query_items__returns_data() async throws {
-        let sut = Implementation(urlSession: BuildGETURLSession())
+        let sut = Implementation(tokenService: testTokenService(),
+                                 urlSession: BuildGETURLSession())
         
         let val = try await sut.getCatsQuery()
         
@@ -27,7 +29,8 @@ final class WebPark_get_Tests: XCTestCase {
     }
     
     func test__get__given_unauthorized__throws_with_401() async throws {
-        let sut = Implementation(urlSession: BuildGETURLSession())
+        let sut = Implementation(tokenService: testTokenService(),
+                                 urlSession: BuildGETURLSession())
         do {
             _ = try await sut.getCats401()
         } catch {

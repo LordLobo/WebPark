@@ -25,7 +25,6 @@ struct Implementation: WebPark {
     var tokenService: (any WebParkTokenServiceProtocol)?
     
     var baseURL =  "https://lordlobo.mockapi.com"
-    var token =  "token"
     var urlSession: URLSession
 }
 

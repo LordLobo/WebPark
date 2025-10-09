@@ -6,44 +6,44 @@
 //
 
 import Foundation
-import XCTest
+import Testing
 @testable import WebPark
 
-@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-final class CoderTests: XCTestCase {
+@Suite("Coder Tests")
+struct CoderTests {
     
-    func test_encode_withValidObject_returnsData() throws {
+    @Test("Encode with valid object returns data")
+    func encodeWithValidObject() async throws {
         let cat = Cat(name: "Whiskers", color: "Orange")
         
         let data: Data = try Coder.encode(cat)
         
-        XCTAssertFalse(data.isEmpty, "Should return non-empty data")
+        #expect(!data.isEmpty, "Should return non-empty data")
         
         // Verify we can decode it back
         let decodedCat: Cat = try Coder.decode(data)
-        XCTAssertEqual(decodedCat.name, "Whiskers")
-        XCTAssertEqual(decodedCat.color, "Orange")
+        #expect(decodedCat.name == "Whiskers")
+        #expect(decodedCat.color == "Orange")
     }
     
-    func test_decode_withValidData_returnsObject() throws {
+    @Test("Decode with valid data returns object")
+    func decodeWithValidData() async throws {
         let jsonData = """
         {"name": "Fluffy", "color": "Black"}
         """.data(using: .utf8)!
         
         let cat: Cat = try Coder.decode(jsonData)
         
-        XCTAssertEqual(cat.name, "Fluffy")
-        XCTAssertEqual(cat.color, "Black")
+        #expect(cat.name == "Fluffy")
+        #expect(cat.color == "Black")
     }
     
-    func test_decode_withInvalidData_throwsError() {
+    @Test("Decode with invalid data throws error")
+    func decodeWithInvalidData() async throws {
         let invalidData = "not json".data(using: .utf8)!
         
-        XCTAssertThrowsError(try Coder<Cat>.decode(invalidData)) { error in
-            XCTAssertTrue(error is JSONCodingError)
-            if let jsonError = error as? JSONCodingError {
-                XCTAssertEqual(jsonError, .decodingError)
-            }
+        #expect(throws: WebParkError.self) {
+            let _: Cat = try Coder.decode(invalidData)
         }
     }
 }

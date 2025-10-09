@@ -11,7 +11,7 @@ import Foundation
 class URLProtocolMock: URLProtocol {
     /// Dictionary maps URLs to tuples of error, data, and response
     nonisolated(unsafe) private static var mockURLs: [URL: (error: Error?, data: Data?, response: HTTPURLResponse?)] = [:]
-    nonisolated(unsafe) private static let lock = NSLock()
+    private static let lock = NSLock()
 
     // Thread-safe APIs to mutate and read mocks
     static func setMock(_ entry: (error: Error?, data: Data?, response: HTTPURLResponse?), for url: URL) {

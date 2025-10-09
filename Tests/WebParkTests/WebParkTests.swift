@@ -5,115 +5,134 @@
 //  Created by Daniel Giralte on 6/5/22.
 //
 
-import XCTest
+import Foundation
+import Testing
 @testable import WebPark
 
-final class WebParkTests: XCTestCase {
-    func test__createRequest__given_valid_request__returns_request() throws {
+@Suite("WebPark Core Functionality Tests")
+struct WebParkTests {
+    @Test("Create request with valid parameters")
+    func createRequestWithValidRequest() async throws {
         let sut = Implementation(tokenService: testTokenService(),
                                  baseURL: "http://google.com/",
                                  urlSession: BuildGETURLSession())
         
         let result = try sut.createRequest("GET", endpoint: "foo")
         
-        XCTAssertNotNil(result)
+        #expect(result != nil, "Should create a valid request")
     }
     
-    func test_createRequest_withInvalidBaseURL_throwsError() {
+    @Test("Create request with invalid base URL throws error")
+    func createRequestWithInvalidBaseURL() async throws {
         let sut = Implementation(tokenService: nil,
                                  baseURL: "not a valid url with spaces and 🚀",
                                  urlSession: URLSession.shared)
         
-        do {
-            _ = try sut.createRequest("GET", endpoint: "/users")
-            XCTFail("Should have thrown an error for invalid base URL")
-        } catch let error as WebParkError {
-            XCTAssertEqual(error, .unableToMakeURL, "Should throw unableToMakeURL error")
-        } catch {
-            XCTFail("Should have thrown WebParkError, but got: \(error)")
+        #expect(throws: WebParkError.unableToMakeURL) {
+            try sut.createRequest("GET", endpoint: "/users")
         }
     }
     
-    func test_createRequest_withValidParameters_createsCorrectRequest() throws {
+    @Test("Create request with valid parameters builds correct request")
+    func createRequestWithValidParameters() async throws {
         let sut = Implementation(tokenService: testTokenService(),
                                  baseURL: "https://api.example.com",
                                  urlSession: URLSession.shared)
         
         let request = try sut.createRequest("GET", endpoint: "/users")
+        let unwrappedRequest = try #require(request, "Should create a valid request")
         
-        XCTAssertNotNil(request, "Should create a valid request")
-        XCTAssertEqual(request?.httpMethod, "GET", "Should set correct HTTP method")
-        XCTAssertEqual(request?.url?.absoluteString, "https://api.example.com/users", "Should build correct URL")
-        XCTAssertEqual(request?.value(forHTTPHeaderField: "Authorization"), "Bearer token", "Should add authorization header")
+        #expect(unwrappedRequest.httpMethod == "GET", "Should set correct HTTP method")
+        #expect(unwrappedRequest.url?.absoluteString == "https://api.example.com/users", "Should build correct URL")
+        #expect(unwrappedRequest.value(forHTTPHeaderField: "Authorization") == "Bearer token", "Should add authorization header")
     }
     
-    func test_createRequest_withQueryItems_buildsCorrectURL() throws {
+    @Test("Create request with query items builds correct URL")
+    func createRequestWithQueryItems() async throws {
         let sut = Implementation(tokenService: nil,
                                  baseURL: "https://api.example.com",
                                  urlSession: URLSession.shared)
         
         let queryItems = [URLQueryItem(name: "limit", value: "10")]
         let request = try sut.createRequest("GET", endpoint: "/users", queryItems: queryItems)
+        let unwrappedRequest = try #require(request, "Should create a valid request")
         
-        XCTAssertNotNil(request, "Should create a valid request")
-        XCTAssertTrue(request?.url?.absoluteString.contains("limit=10") == true, "Should include query parameters")
+        #expect(unwrappedRequest.url?.absoluteString.contains("limit=10") == true, "Should include query parameters")
     }
     
-    func test_createRequest_withJSONFlag_setsContentTypeHeader() throws {
+    @Test("Create request with JSON flag sets content type header")
+    func createRequestWithJSONFlag() async throws {
         let sut = Implementation(tokenService: nil,
                                  baseURL: "https://api.example.com",
                                  urlSession: URLSession.shared)
         
         let request = try sut.createRequest("POST", endpoint: "/users", isJSON: true)
         
-        XCTAssertEqual(request?.value(forHTTPHeaderField: "Content-Type"), "application/json", "Should set JSON content type")
+        #expect(request?.value(forHTTPHeaderField: "Content-Type") == "application/json", "Should set JSON content type")
     }
-    
+        
     // MARK: - Error Response Code Tests
     
-    func test_errorResponseCode_initWithKnownCodes_returnsCorrectEnum() {
-        XCTAssertEqual(ErrorResponseCode(rawValue: 401), .unauthorized)
-        XCTAssertEqual(ErrorResponseCode(rawValue: 404), .notFound)
-        XCTAssertEqual(ErrorResponseCode(rawValue: 500), .internalServerError)
-        XCTAssertEqual(ErrorResponseCode(rawValue: 503), .serviceUnavailable)
+    @Suite("Error Response Code Tests")
+    struct ErrorResponseCodeTests {
+        @Test("Initialize with known codes returns correct enum")
+        func initWithKnownCodes() async throws {
+            #expect(ErrorResponseCode(rawValue: 401) == .unauthorized)
+            #expect(ErrorResponseCode(rawValue: 404) == .notFound)
+            #expect(ErrorResponseCode(rawValue: 500) == .internalServerError)
+            #expect(ErrorResponseCode(rawValue: 503) == .serviceUnavailable)
+        }
+        
+        @Test("Initialize with unknown code returns nil")
+        func initWithUnknownCode() async throws {
+            #expect(ErrorResponseCode(rawValue: 418) == nil)
+        }
+        
+        @Test("WebParkHttpError initializes with status code creates correct error")
+        func webParkHttpErrorInit() async throws {
+            let error401 = WebParkHttpError(401)
+            #expect(error401.httpError == .unauthorized)
+            #expect(error401.statusCode == 401)
+            #expect(error401.description == "HTTP 401: Unauthorized")
+            
+            let error999 = WebParkHttpError(999)
+            #expect(error999.httpError == .unhandledResponseCode)
+            #expect(error999.statusCode == 999)
+        }
     }
     
-    func test_errorResponseCode_initWithUnknownCode_returnsNil() {
-        XCTAssertEqual(ErrorResponseCode(rawValue: 418), nil)
-    }
+    // MARK: - URLRequest Extension Tests
     
-    func test_webParkHttpError_initWithStatusCode_createsCorrectError() {
-        let error401 = WebParkHttpError(401)
-        XCTAssertEqual(error401.httpError, .unauthorized)
+    @Suite("URLRequest Extension Tests")
+    struct URLRequestExtensionTests {
+        @Test("Adding bearer authorization sets auth header")
+        func addingBearerAuthorization() async throws {
+            let url = URL(string: "https://api.example.com")!
+            let request = URLRequest(url: url)
+            
+            let authorizedRequest = request.addingBearerAuthorization(token: "test-token")
+            
+            #expect(authorizedRequest.value(forHTTPHeaderField: "Authorization") == "Bearer test-token")
+        }
         
-        let error999 = WebParkHttpError(999)
-        XCTAssertEqual(error999.httpError, .unhandledResponseCode)
-    }
-    
-    func test_addingBearerAuthorization_setsAuthHeader() {
-        let url = URL(string: "https://api.example.com")!
-        let request = URLRequest(url: url)
+        @Test("Sending JSON sets content type header")
+        func sendingJSON() async throws {
+            let url = URL(string: "https://api.example.com")!
+            let request = URLRequest(url: url)
+            
+            let jsonRequest = request.sendingJSON()
+            
+            #expect(jsonRequest.value(forHTTPHeaderField: "Content-Type") == "application/json")
+        }
         
-        let authorizedRequest = request.addingBearerAuthorization(token: "test-token")
-        
-        XCTAssertEqual(authorizedRequest.value(forHTTPHeaderField: "Authorization"), "Bearer test-token")
-    }
-    
-    func test_sendingJSON_setsContentTypeHeader() {
-        let url = URL(string: "https://api.example.com")!
-        let request = URLRequest(url: url)
-        
-        let jsonRequest = request.sendingJSON()
-        
-        XCTAssertEqual(jsonRequest.value(forHTTPHeaderField: "Content-Type"), "application/json")
-    }
-    
-    func test_acceptingJSON_setsAcceptHeader() {
-        let url = URL(string: "https://api.example.com")!
-        let request = URLRequest(url: url)
-        
-        let jsonRequest = request.acceptingJSON()
-        
-        XCTAssertEqual(jsonRequest.value(forHTTPHeaderField: "Accept"), "application/json")
+        @Test("Accepting JSON sets accept header")
+        func acceptingJSON() async throws {
+            let url = URL(string: "https://api.example.com")!
+            let request = URLRequest(url: url)
+            
+            let jsonRequest = request.acceptingJSON()
+            
+            #expect(jsonRequest.value(forHTTPHeaderField: "Accept") == "application/json")
+        }
     }
 }

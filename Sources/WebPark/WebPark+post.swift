@@ -21,10 +21,10 @@ public extension WebPark {
         
         request.httpBody = try Coder.encode(body)
                 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await urlSession.data(for: request)
         
         if let res = response as? HTTPURLResponse,
-           res.statusCode > 400 {
+           res.statusCode >= 400 {
             throw WebParkHttpError(res.statusCode)
         }
             

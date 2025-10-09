@@ -14,10 +14,10 @@ struct Cat: Codable {
 }
 
 struct testTokenService: WebParkTokenServiceProtocol {
-    var token = "token"
+    var token: String { "token" }
     
     func refreshToken() async throws {
-        
+        // Mock implementation
     }
 }
 

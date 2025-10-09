@@ -13,8 +13,7 @@ public class Coder<T: Codable> {
             let ret = try JSONEncoder().encode(data)
             return ret
         } catch {
-            // print(error) - use for debugging
-            throw JSONCodingError.encodingError
+            throw WebParkError.encodeFailure(underlying: error.localizedDescription)
         }
     }
     
@@ -23,12 +22,12 @@ public class Coder<T: Codable> {
             let ret = try JSONDecoder().decode(T.self, from: data)
             return ret
         } catch {
-            // print(error) - use for debugging
-            throw JSONCodingError.decodingError
+            throw WebParkError.decodeFailure(underlying: error.localizedDescription)
         }
     }
 }
 
+@available(*, deprecated, message: "Use WebParkError.encodeFailure and WebParkError.decodeFailure instead")
 public enum JSONCodingError: Error {
     case encodingError
     case decodingError

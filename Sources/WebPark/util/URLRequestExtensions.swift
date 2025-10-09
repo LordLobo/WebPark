@@ -7,8 +7,7 @@
 
 import Foundation
 
-extension URLRequest {
-    
+extension URLRequest {    
     public func addingBearerAuthorization(token: String) -> URLRequest {
         var request = self
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")

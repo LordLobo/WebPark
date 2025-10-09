@@ -24,7 +24,7 @@ public extension WebPark {
         let (data, response) = try await urlSession.data(for: request)
         
         if let res = response as? HTTPURLResponse,
-           res.statusCode > 400 {
+           res.statusCode >= 400 {
             throw WebParkHttpError(res.statusCode)
         }
         

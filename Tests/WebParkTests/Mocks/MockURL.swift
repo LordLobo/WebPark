@@ -10,7 +10,35 @@ import Foundation
 // special thanks to this gist https://gist.github.com/soujohnreis/7c86965efbbb2297d4db3f84027327c1
 class URLProtocolMock: URLProtocol {
     /// Dictionary maps URLs to tuples of error, data, and response
-    static var mockURLs = [URL?: (error: Error?, data: Data?, response: HTTPURLResponse?)]()
+    nonisolated(unsafe) private static var mockURLs: [URL: (error: Error?, data: Data?, response: HTTPURLResponse?)] = [:]
+    nonisolated(unsafe) private static let lock = NSLock()
+
+    // Thread-safe APIs to mutate and read mocks
+    static func setMock(_ entry: (error: Error?, data: Data?, response: HTTPURLResponse?), for url: URL) {
+        lock.lock()
+        mockURLs[url] = entry
+        lock.unlock()
+    }
+    /// Set multiple mock entries at once. Each element is a pair of (URL, entry).
+    static func setMock(_ entries: [(URL, (error: Error?, data: Data?, response: HTTPURLResponse?))]) {
+        lock.lock()
+        for (url, entry) in entries {
+            mockURLs[url] = entry
+        }
+        lock.unlock()
+    }
+
+    static func removeAllMocks() {
+        lock.lock()
+        mockURLs.removeAll()
+        lock.unlock()
+    }
+
+    static func mock(for url: URL) -> (error: Error?, data: Data?, response: HTTPURLResponse?)? {
+        lock.lock()
+        defer { lock.unlock() }
+        return mockURLs[url]
+    }
     
     override class func canInit(with request: URLRequest) -> Bool {
         // Handle all types of requests
@@ -24,7 +52,7 @@ class URLProtocolMock: URLProtocol {
     
     override func startLoading() {
         if let url = request.url {
-            if let (error, data, response) = URLProtocolMock.mockURLs[url] {
+            if let (error, data, response) = URLProtocolMock.mock(for: url) {
                 // We have a mock response specified so return it.
                 if let responseStrong = response {
                     self.client?.urlProtocol(self, didReceive: responseStrong, cacheStoragePolicy: .notAllowed)
@@ -50,3 +78,4 @@ class URLProtocolMock: URLProtocol {
         // Required to be implemented. Do nothing here.
     }
 }
+

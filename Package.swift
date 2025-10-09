@@ -1,13 +1,13 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.2
 import PackageDescription
 
 let package = Package(
     name: "WebPark",
     platforms: [
         .macOS(.v12),
-        .iOS(.v17),
-        .tvOS(.v17),
-        .watchOS(.v10)
+        .iOS(.v15),
+        .tvOS(.v15),
+        .watchOS(.v8)
     ],
     products: [
         .library(

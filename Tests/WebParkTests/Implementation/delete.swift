@@ -23,12 +23,12 @@ func BuildDELETEURLSession() -> URLSession {
                                       headerFields: nil)!
     
     let noError: Error? = nil
-      
-    URLProtocolMock.mockURLs = [
-        getMockBaseDELETEURL: (noError, nil, response200),
-        getMockQueryDELETEURL: (noError, nil, response200),
-        getMockErrorDELETEURL: (noError, nil, response401)
-    ]
+    
+    URLProtocolMock.setMock([
+        (getMockBaseDELETEURL, (error: noError, data: nil, response: response200)),
+        (getMockQueryDELETEURL, (error: noError, data: nil, response: response200)),
+        (getMockErrorDELETEURL, (error: noError, data: nil, response: response401))
+    ])
     
     let session = URLSessionConfiguration.ephemeral
     session.protocolClasses = [URLProtocolMock.self]
@@ -50,3 +50,4 @@ extension Implementation {
         return try await delete("/deletecatserror")
     }
 }
+

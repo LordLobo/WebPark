@@ -7,13 +7,34 @@
 
 import Foundation
 
-/// 
+
+/**
+ A lightweight protocol that defines the essentials for making web requests
+ in a WebPark-powered client.
+
+ Conform to `WebPark` to centralize your networking configuration such as
+ the base API URL, the `URLSession` to use for requests, and an optional
+ token service for authenticated calls.
+ */
 public protocol WebPark {
+    /// The base URL for your API, e.g. "https://api.example.com".
+    ///
+    /// This value is concatenated with relative endpoint paths when building requests.
     var baseURL: String { get }
     
+    /// The `URLSession` used to execute network requests.
+    ///
+    /// A default implementation provides `URLSession.shared` via a protocol extension.
+    /// Override by supplying your own session when needed (e.g. for custom configuration
+    /// or testing with mocked sessions).
     var urlSession: URLSession { get }
     
-    // possible fix for token refresh - token service that catches 401s
+    /// Optional token service used to attach and refresh a bearer token for authenticated requests.
+    ///
+    /// When present, `createRequest(_:endpoint:queryItems:isJSON:)` automatically adds an
+    /// `Authorization: Bearer <token>` header using `tokenService.token`.
+    /// Implementations may call `tokenService.refreshToken()` upon receiving an HTTP 401
+    /// to refresh credentials and retry as appropriate.
     var tokenService: WebParkTokenServiceProtocol? { get }
 }
 
@@ -27,9 +48,9 @@ extension WebPark {
     var urlSession: URLSession { URLSession.shared }
     
     internal func createRequest(_ method: String,
-                                endpoint: String,
-                                queryItems: [URLQueryItem] = [],
-                                isJSON: Bool = false) throws -> URLRequest? {
+                            endpoint: String,
+                            queryItems: [URLQueryItem] = [],
+                            isJSON: Bool = false) throws -> URLRequest? {
         
         guard var urlComponents = URLComponents(string: self.baseURL + endpoint)
         else {
@@ -65,7 +86,7 @@ public enum WebParkError: Error {
     case encodeFailure
 }
 
-public enum ErrorResponseCode: Int {
+public enum ErrorResponseCode: Int, Sendable {
     case unauthorized = 401
     case notFound = 404
     case internalServerError = 500

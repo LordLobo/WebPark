@@ -39,12 +39,12 @@ func BuildGETURLSession() -> URLSession {
         ]
         """.data(using: .utf8)
     
-    URLProtocolMock.mockURLs = [
-        getMockBaseGETURL: (noError, data, response200),
-        getMockQueryGETURL: (noError, data, response200),
-        getMockErrorGETURL: (noError, nil, response401)
-    ]
-            
+    URLProtocolMock.setMock([
+        (getMockBaseGETURL, (error: noError, data: data, response: response200)),
+        (getMockQueryGETURL, (error: noError, data: data, response: response200)),
+        (getMockErrorGETURL, (error: noError, data: nil, response: response401))
+    ])
+    
     let session = URLSessionConfiguration.ephemeral
     session.protocolClasses = [URLProtocolMock.self]
     

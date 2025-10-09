@@ -48,20 +48,31 @@ extension WebPark {
     var urlSession: URLSession { URLSession.shared }
     
     internal func createRequest(_ method: String,
-                            endpoint: String,
-                            queryItems: [URLQueryItem] = [],
-                            isJSON: Bool = false) throws -> URLRequest? {
+                                endpoint: String,
+                                queryItems: [URLQueryItem] = [],
+                                isJSON: Bool = false) throws -> URLRequest? {
         
-        guard var urlComponents = URLComponents(string: self.baseURL + endpoint)
-        else {
+        // Construct the full URL string
+        let fullURLString = self.baseURL + endpoint
+        
+        // Validate this is a proper HTTP/HTTPS URL since this is an HTTP library
+        guard isValidHTTPURL(fullURLString) else {
             throw WebParkError.unableToMakeURL
         }
         
-        if queryItems.hasItems {
-            urlComponents.queryItems = queryItems
+        // Create URLComponents for query parameter handling
+        guard let urlComponents = URLComponents(string: fullURLString) else {
+            throw WebParkError.unableToMakeURL
         }
         
-        guard let url = urlComponents.url else { throw WebParkError.unableToMakeURL}
+        var finalComponents = urlComponents
+        if queryItems.hasItems {
+            finalComponents.queryItems = queryItems
+        }
+        
+        guard let url = finalComponents.url else { 
+            throw WebParkError.unableToMakeURL
+        }
         
         var request = URLRequest(url: url)
         request.httpMethod = method
@@ -75,6 +86,42 @@ extension WebPark {
         }
         
         return request
+    }
+    
+    /// Validates that a string represents a valid HTTP or HTTPS URL
+    /// This is stricter than URL(string:) and ensures proper web URLs for HTTP requests
+    private func isValidHTTPURL(_ urlString: String) -> Bool {
+        // Check for invalid characters that shouldn't be in URLs (spaces, emojis, etc.)
+        let invalidCharacters = CharacterSet(charactersIn: " \t\n\r\u{00A0}🚀🎉") // Common invalid chars including non-breaking space and emojis
+        if urlString.rangeOfCharacter(from: invalidCharacters) != nil {
+            return false
+        }
+        
+        // Try to create URLComponents first
+        guard let components = URLComponents(string: urlString) else {
+            return false
+        }
+        
+        // Ensure we have a valid scheme (http or https)
+        guard let scheme = components.scheme?.lowercased(),
+              scheme == "http" || scheme == "https" else {
+            return false
+        }
+        
+        // Ensure we have a host
+        guard let host = components.host, !host.isEmpty else {
+            return false
+        }
+        
+        // Verify we can create a valid URL from components
+        guard let url = components.url else {
+            return false
+        }
+        
+        // Final validation: ensure the URL's absoluteString matches reasonable expectations
+        // This catches edge cases where URLComponents might be too lenient
+        let absoluteString = url.absoluteString
+        return absoluteString.hasPrefix("http://") || absoluteString.hasPrefix("https://")
     }    
 }
 

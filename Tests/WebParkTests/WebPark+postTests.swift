@@ -6,70 +6,70 @@
 //
 
 import Foundation
-import XCTest
+import Testing
 @testable import WebPark
 
-@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-final class WebPark_post_Tests: XCTestCase {
+func BuildPOSTURLSession() -> URLSession {
+    // Don't call removeAllMocks() - let different test suites coexist
+    // Use unique URLs for POST tests to avoid conflicts with other suites
     
-    func BuildPOSTURLSession() -> URLSession {
-        let postURL = URL(string: "https://lordlobo.mockapi.com/cats")!
-        let errorURL = URL(string: "https://lordlobo.mockapi.com/catserror")!
-        
-        let response201 = HTTPURLResponse(url: postURL,
-                                          statusCode: 201,
-                                          httpVersion: nil,
-                                          headerFields: ["Content-Type": "application/json"])!
-        
-        let response400 = HTTPURLResponse(url: errorURL,
-                                          statusCode: 400,
-                                          httpVersion: nil,
-                                          headerFields: nil)!
-        
-        let responseData = """
-        {
-            "id": "123",
-            "name": "Fluffy",
-            "color": "Gray"
-        }
-        """.data(using: .utf8)
-        
-        URLProtocolMock.setMock([
-            (postURL, (error: nil, data: responseData, response: response201)),
-            (errorURL, (error: nil, data: nil, response: response400))
-        ])
-        
-        let session = URLSessionConfiguration.ephemeral
-        session.protocolClasses = [URLProtocolMock.self]
-        
-        return URLSession(configuration: session)
+    let postURL = URL(string: "https://lordlobo.mockapi.com/postcats")!
+    let errorURL = URL(string: "https://lordlobo.mockapi.com/postcatserror")!
+    
+    let response201 = HTTPURLResponse(url: postURL,
+                                      statusCode: 201,
+                                      httpVersion: nil,
+                                      headerFields: ["Content-Type": "application/json"])!
+    
+    let response400 = HTTPURLResponse(url: errorURL,
+                                      statusCode: 400,
+                                      httpVersion: nil,
+                                      headerFields: nil)!
+    
+    let responseData = """
+    {
+        "name": "Fluffy",
+        "color": "Gray"
     }
+    """.data(using: .utf8)
     
-    func test_post_withValidData_returnsCreatedObject() async throws {
-        let sut = Implementation(urlSession: BuildPOSTURLSession())
+    let noError: Error? = nil
+    
+    URLProtocolMock.setMock([
+        (postURL, (error: noError, data: responseData, response: response201)),
+        (errorURL, (error: noError, data: nil, response: response400))
+    ])
+    
+    let session = URLSessionConfiguration.ephemeral
+    session.protocolClasses = [URLProtocolMock.self]
+    
+    return URLSession(configuration: session)
+}
+
+@Suite("WebPark POST Tests", .serialized)
+struct WebPark_post_Tests {
+    let sut = Implementation(urlSession: BuildPOSTURLSession())
+    
+    @Test("POST with valid data returns created object")
+    func postWithValidDataReturnsCreatedObject() async throws {
         let newCat = Cat(name: "Fluffy", color: "Gray")
         
-        let result: Cat = try await sut.post("/cats", body: newCat)
+        let result: Cat = try await sut.post("/postcats", body: newCat)
         
-        XCTAssertEqual(result.name, "Fluffy", "Should return the posted cat")
-        XCTAssertEqual(result.color, "Gray", "Should return correct color")
+        #expect(result.name == "Fluffy", "Should return the posted cat")
+        #expect(result.color == "Gray", "Should return correct color")
     }
     
-    func test_post_withBadRequest_throwsError() async throws {
-        let sut = Implementation(urlSession: BuildPOSTURLSession())
+    @Test("POST with bad request throws error")
+    func postWithBadRequestThrowsError() async throws {
         let newCat = Cat(name: "Invalid", color: "None")
         
         do {
-            let _: Cat = try await sut.post("/catserror", body: newCat)
-            XCTFail("Should have thrown an error for 400 response")
+            let _: Cat = try await sut.post("/postcatserror", body: newCat)
+            Issue.record("Should have thrown an error for 400 response")
         } catch let error as WebParkHttpError {
-            XCTAssertTrue(error.httpError.rawValue >= 400, "Should throw 4xx error")
+            #expect(error.httpError.rawValue >= 400, "Should throw 4xx error")
         }
     }
 }
 
-extension Implementation {
-    func post<T: Codable, D: Codable>(_ endpoint: String, body: D) async throws -> T {
-        return try await post(endpoint, body: body)
-    }
-}

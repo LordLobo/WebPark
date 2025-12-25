@@ -23,9 +23,16 @@ struct testTokenService: WebParkTokenServiceProtocol {
 
 struct Implementation: WebPark {
     var tokenService: (any WebParkTokenServiceProtocol)?
-    
-    var baseURL =  "https://lordlobo.mockapi.com"
+    var baseURL: String
     var urlSession: URLSession
+    
+    init(tokenService: (any WebParkTokenServiceProtocol)? = nil,
+         baseURL: String = "https://lordlobo.mockapi.com",
+         urlSession: URLSession) {
+        self.tokenService = tokenService
+        self.baseURL = baseURL
+        self.urlSession = urlSession
+    }
 }
 
 

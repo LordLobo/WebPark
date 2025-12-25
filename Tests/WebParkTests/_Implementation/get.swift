@@ -9,6 +9,9 @@ import Foundation
 @testable import WebPark
 
 func BuildGETURLSession() -> URLSession {
+    // Don't call removeAllMocks() - let different test suites coexist
+    // Each suite uses unique URLs so there's no conflict
+    
     let getMockBaseGETURL = URL(string: "https://lordlobo.mockapi.com/cats")!
     let getMockQueryGETURL = URL(string: "https://lordlobo.mockapi.com/cats?count=2")!
     let getMockErrorGETURL = URL(string: "https://lordlobo.mockapi.com/catserror")!

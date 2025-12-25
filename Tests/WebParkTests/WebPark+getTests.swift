@@ -6,73 +6,77 @@
 //
 
 import Foundation
-import XCTest
+import Testing
 @testable import WebPark
 
-final class WebPark_get_Tests: XCTestCase {
-    func test__get__given_no_query_items__returns_data() async throws {
-        let sut = Implementation(tokenService: testTokenService(),
-                                 urlSession: BuildGETURLSession())
+@Suite("WebPark GET Tests", .serialized)
+struct WebPark_get_Tests {
+    let sut = Implementation(tokenService: testTokenService(),
+                             urlSession: BuildGETURLSession())
+    
+    @Test("GET with no query items returns data")
+    func getWithNoQueryItemsReturnsData() async throws {
         
         let val = try await sut.getCats()
         
-        XCTAssert(val[0].name == "Yuki")
+        #expect(val[0].name == "Yuki")
     }
     
-    func test__get__given_query_items__returns_data() async throws {
-        let sut = Implementation(tokenService: testTokenService(),
-                                 urlSession: BuildGETURLSession())
+    @Test("GET with query items returns data")
+    func getWithQueryItemsReturnsData() async throws {
         
         let val = try await sut.getCatsQuery()
         
-        XCTAssert(val[0].name == "Yuki")
+        #expect(val[0].name == "Yuki")
     }
     
-    func test__get__given_unauthorized__throws_with_401() async throws {
-        let sut = Implementation(tokenService: testTokenService(),
-                                 urlSession: BuildGETURLSession())
+    @Test("GET with unauthorized response throws with 401")
+    func getWithUnauthorizedThrowsWith401() async throws {
+        
+        await #expect(throws: WebParkHttpError.self) {
+            try await sut.getCats401()
+        }
+        
+        // If you need to verify the specific error code:
         do {
             _ = try await sut.getCats401()
-        } catch {
-            let err = error as! WebParkHttpError
-            XCTAssert(err.httpError == ErrorResponseCode.unauthorized)
+            Issue.record("Expected error to be thrown")
+        } catch let error as WebParkHttpError {
+            #expect(error.httpError == ErrorResponseCode.unauthorized)
         }
     }
     
-    func test_get_withValidResponse_returnsDecodedData() async throws {
-        let sut = Implementation(tokenService: testTokenService(),
-                                 urlSession: BuildGETURLSession())
+    @Test("GET with valid response returns decoded data")
+    func getWithValidResponseReturnsDecodedData() async throws {
         
         let cats: [Cat] = try await sut.getCats()
         
-        XCTAssertEqual(cats.count, 2, "Should return 2 cats")
-        XCTAssertEqual(cats[0].name, "Yuki", "First cat should be Yuki")
-        XCTAssertEqual(cats[0].color, "Brown", "Yuki should be brown")
-        XCTAssertEqual(cats[1].name, "Carl", "Second cat should be Carl")
-        XCTAssertEqual(cats[1].color, "White", "Carl should be white")
+        #expect(cats.count == 2, "Should return 2 cats")
+        #expect(cats[0].name == "Yuki", "First cat should be Yuki")
+        #expect(cats[0].color == "Brown", "Yuki should be brown")
+        #expect(cats[1].name == "Carl", "Second cat should be Carl")
+        #expect(cats[1].color == "White", "Carl should be white")
     }
     
-    func test_get_withQueryItems_returnsDecodedData() async throws {
-        let sut = Implementation(tokenService: testTokenService(),
-                                 urlSession: BuildGETURLSession())
+    @Test("GET with query items returns decoded data")
+    func getWithQueryItemsReturnsDecodedData() async throws {
         
         let cats: [Cat] = try await sut.getCatsQuery()
         
-        XCTAssertEqual(cats.count, 2, "Should return 2 cats even with query")
-        XCTAssertEqual(cats[0].name, "Yuki", "First cat should still be Yuki")
+        #expect(cats.count == 2, "Should return 2 cats even with query")
+        #expect(cats[0].name == "Yuki", "First cat should still be Yuki")
     }
     
-    func test_get_withUnauthorizedResponse_throwsWebParkHttpError() async throws {
-        let sut = Implementation(tokenService: testTokenService(),
-                                 urlSession: BuildGETURLSession())
+    @Test("GET with unauthorized response throws WebParkHttpError")
+    func getWithUnauthorizedResponseThrowsWebParkHttpError() async throws {
         
         do {
             let _: [Cat] = try await sut.getCats401()
-            XCTFail("Should have thrown an error for 401 response")
+            Issue.record("Should have thrown an error for 401 response")
         } catch let error as WebParkHttpError {
-            XCTAssertEqual(error.httpError, .unauthorized, "Should throw 401 unauthorized error")
+            #expect(error.httpError == .unauthorized, "Should throw 401 unauthorized error")
         } catch {
-            XCTFail("Should have thrown WebParkHttpError, but got: \(error)")
+            Issue.record("Should have thrown WebParkHttpError, but got: \(error)")
         }
     }
 }

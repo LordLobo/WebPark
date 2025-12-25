@@ -8,6 +8,9 @@ import Foundation
 @testable import WebPark
 
 func BuildDELETEURLSession() -> URLSession {
+    // Don't call removeAllMocks() - let different test suites coexist
+    // Each suite uses unique URLs so there's no conflict
+    
     let getMockBaseDELETEURL = URL(string: "https://lordlobo.mockapi.com/deletecats")!
     let getMockQueryDELETEURL = URL(string: "https://lordlobo.mockapi.com/deletecats?count=2")!
     let getMockErrorDELETEURL = URL(string: "https://lordlobo.mockapi.com/deletecatserror")!

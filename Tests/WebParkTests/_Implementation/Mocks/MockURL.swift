@@ -19,6 +19,7 @@ class URLProtocolMock: URLProtocol {
         mockURLs[url] = entry
         lock.unlock()
     }
+    
     /// Set multiple mock entries at once. Each element is a pair of (URL, entry).
     static func setMock(_ entries: [(URL, (error: Error?, data: Data?, response: HTTPURLResponse?))]) {
         lock.lock()
@@ -31,6 +32,15 @@ class URLProtocolMock: URLProtocol {
     static func removeAllMocks() {
         lock.lock()
         mockURLs.removeAll()
+        lock.unlock()
+    }
+    
+    /// Remove mocks for specific URLs only (useful for test isolation)
+    static func removeMocks(for urls: [URL]) {
+        lock.lock()
+        for url in urls {
+            mockURLs.removeValue(forKey: url)
+        }
         lock.unlock()
     }
 
@@ -78,4 +88,3 @@ class URLProtocolMock: URLProtocol {
         // Required to be implemented. Do nothing here.
     }
 }
-

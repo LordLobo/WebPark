@@ -25,7 +25,7 @@ func BuildDELETEURLSession() -> URLSession {
                                       httpVersion: nil,
                                       headerFields: nil)!
     
-    let noError: Error? = nil
+    let noError: (any Error)? = nil
     
     URLProtocolMock.setMock([
         (getMockBaseDELETEURL, (error: noError, data: nil, response: response200)),
@@ -40,17 +40,16 @@ func BuildDELETEURLSession() -> URLSession {
 }
 
 extension Implementation {
-    func deleteCat() async throws -> Void {
-        return try await delete("/deletecats")
+    func deleteCat() async throws {
+        try await delete("/deletecats")
     }
     
-    func deleteCatQuery() async throws -> Void {
+    func deleteCatQuery() async throws {
         let query = [URLQueryItem(name: "count", value: "2")]
         return try await delete("/deletecats", queryItems: query)
     }
     
-    func deleteCats401() async throws -> Void {
-        return try await delete("/deletecatserror")
+    func deleteCats401() async throws {
+        try await delete("/deletecatserror")
     }
 }
-

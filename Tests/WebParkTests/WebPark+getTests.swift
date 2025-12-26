@@ -1,6 +1,6 @@
 //
 //  WebPark+getTests.swift
-//  
+//
 //
 //  Created by Daniel Giralte on 5/29/24.
 //
@@ -16,7 +16,6 @@ struct WebPark_get_Tests {
     
     @Test("GET with no query items returns data")
     func getWithNoQueryItemsReturnsData() async throws {
-        
         let val = try await sut.getCats()
         
         #expect(val[0].name == "Yuki")
@@ -24,7 +23,6 @@ struct WebPark_get_Tests {
     
     @Test("GET with query items returns data")
     func getWithQueryItemsReturnsData() async throws {
-        
         let val = try await sut.getCatsQuery()
         
         #expect(val[0].name == "Yuki")
@@ -32,7 +30,6 @@ struct WebPark_get_Tests {
     
     @Test("GET with unauthorized response throws with 401")
     func getWithUnauthorizedThrowsWith401() async throws {
-        
         await #expect(throws: WebParkHttpError.self) {
             try await sut.getCats401()
         }
@@ -48,7 +45,6 @@ struct WebPark_get_Tests {
     
     @Test("GET with valid response returns decoded data")
     func getWithValidResponseReturnsDecodedData() async throws {
-        
         let cats: [Cat] = try await sut.getCats()
         
         #expect(cats.count == 2, "Should return 2 cats")
@@ -60,7 +56,6 @@ struct WebPark_get_Tests {
     
     @Test("GET with query items returns decoded data")
     func getWithQueryItemsReturnsDecodedData() async throws {
-        
         let cats: [Cat] = try await sut.getCatsQuery()
         
         #expect(cats.count == 2, "Should return 2 cats even with query")
@@ -69,7 +64,6 @@ struct WebPark_get_Tests {
     
     @Test("GET with unauthorized response throws WebParkHttpError")
     func getWithUnauthorizedResponseThrowsWebParkHttpError() async throws {
-        
         do {
             let _: [Cat] = try await sut.getCats401()
             Issue.record("Should have thrown an error for 401 response")

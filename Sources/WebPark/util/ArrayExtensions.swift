@@ -13,7 +13,7 @@ public extension Array {
     /// This is a more semantic alternative to `!isEmpty`
     /// - Returns: `true` if the array has one or more elements, `false` if empty
     var hasItems: Bool {
-        return !isEmpty
+        !isEmpty
     }
 }
 
@@ -23,6 +23,6 @@ public extension Collection {
     /// This provides a semantic alternative to `!isEmpty` for any Collection type
     /// - Returns: `true` if the collection has one or more elements, `false` if empty
     var hasItems: Bool {
-        return !isEmpty
+        !isEmpty
     }
 }

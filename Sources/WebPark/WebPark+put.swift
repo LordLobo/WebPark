@@ -9,10 +9,8 @@ import Foundation
 
 @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 public extension WebPark {
-    
     func put<T, D>(_ endpoint: String,
-                   body: D) async throws -> T where T:Codable, D:Codable {
-        
+                   body: D) async throws -> T where T: Codable, D: Codable {
         guard var request = try createRequest("PUT",
                                                      endpoint: endpoint,
                                                      isJSON: true) else {
@@ -30,5 +28,4 @@ public extension WebPark {
             
         return try Coder.decode(data)
     }
-    
 }

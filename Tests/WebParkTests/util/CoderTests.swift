@@ -11,7 +11,6 @@ import Testing
 
 @Suite("Coder Tests")
 struct CoderTests {
-    
     @Test("Encode with valid object returns data")
     func encodeWithValidObject() async throws {
         let cat = Cat(name: "Whiskers", color: "Orange")

@@ -35,7 +35,7 @@ public protocol WebPark {
     /// `Authorization: Bearer <token>` header using `tokenService.token`.
     /// Implementations may call `tokenService.refreshToken()` upon receiving an HTTP 401
     /// to refresh credentials and retry as appropriate.
-    var tokenService: WebParkTokenServiceProtocol? { get }
+    var tokenService: (any WebParkTokenServiceProtocol)? { get }
 }
 
 public protocol WebParkTokenServiceProtocol {
@@ -63,7 +63,6 @@ extension WebPark {
                                 endpoint: String,
                                 queryItems: [URLQueryItem] = [],
                                 isJSON: Bool = false) throws -> URLRequest? {
-        
         // Construct the full URL string
         let fullURLString = self.baseURL + endpoint
         
@@ -105,7 +104,6 @@ extension WebPark {
                                 endpoint: String,
                                 queryItems: [URLQueryItem] = [],
                                 isJSON: Bool = false) async throws -> URLRequest? {
-        
         // Construct the full URL string
         let fullURLString = self.baseURL + endpoint
         
@@ -265,11 +263,10 @@ public struct WebParkHttpError: Error, Equatable, CustomStringConvertible {
     }
     
     public var description: String {
-        return "HTTP \(statusCode): \(httpError.description)"
+        "HTTP \(statusCode): \(httpError.description)"
     }
     
     public var localizedDescription: String {
-        return description
+        description
     }
 }
-

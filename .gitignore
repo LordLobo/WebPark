@@ -1,9 +1,94 @@
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+*.xcodeproj
+xcuserdata/
+DerivedData/
 .DS_Store
+
+# Xcode
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcuserstate
+*.xcworkspace
+!default.xcworkspace
+project.xcworkspace/
+xcshareddata/
+
+# Build artifacts
+*.o
+*.a
+*.dylib
+*.dSYM
+*.swiftmodule
+*.swiftdoc
+
+# Code coverage
+*.profdata
+*.profraw
+coverage.lcov
+.codecov.yml
+
+# SwiftLint
+.swiftlint.yml~
+
+# Swift Package Manager dependencies
+Packages/
+.build-tmp/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Thumbnails
+*.thumb
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# SPM
 /.build
 /Packages
 /*.xcodeproj
 xcuserdata/
-DerivedData/
-.swiftpm/config/registries.json
-.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
-.netrc
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Documentation build
+docs/
+.docc-build/
+
+# Testing
+*.xcresult
+TestResults/
+
+# Backup files
+*~.nib
+*.swp
+*.bak
+*.tmp
+*.backup

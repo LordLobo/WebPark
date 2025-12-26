@@ -43,7 +43,7 @@ struct WebPark_delete_Tests {
     
     @Test("DELETE returns Void on success")
     func deleteReturnsVoidOnSuccess() async throws {
-        let _ : Void = try await sut.deleteCat()
+        let _: Void = try await sut.deleteCat()
         
         // If we reach this point without throwing, the test passes
         // Void is the expected return type
@@ -87,5 +87,3 @@ struct WebPark_delete_Tests {
         }
     }
 }
-
-

@@ -107,4 +107,3 @@ struct WebPark_put_Tests {
         #expect(result.color == "Black", "Color should be decoded")
     }
 }
-

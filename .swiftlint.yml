@@ -1,0 +1,250 @@
+# SwiftLint Configuration for WebPark
+# This file defines the linting rules for maintaining code quality
+
+# Paths to include in linting
+included:
+  - Sources
+  - Tests
+
+# Paths to exclude from linting
+excluded:
+  - .build
+  - .swiftpm
+  - DerivedData
+  - Packages
+
+# Opt-in rules (not enabled by default)
+opt_in_rules:
+  - array_init
+  - attributes
+  - closure_end_indentation
+  - closure_spacing
+  - collection_alignment
+  - contains_over_filter_count
+  - contains_over_filter_is_empty
+  - contains_over_first_not_nil
+  - contains_over_range_nil_comparison
+  - discouraged_object_literal
+  - empty_collection_literal
+  - empty_count
+  - empty_string
+  - enum_case_associated_values_count
+  - explicit_init
+  - extension_access_modifier
+  - fallthrough
+  - fatal_error_message
+  - file_header
+  - file_name
+  - file_name_no_space
+  - first_where
+  - flatmap_over_map_reduce
+  - identical_operands
+  - implicit_return
+  - joined_default_parameter
+  - last_where
+  - legacy_multiple
+  - legacy_random
+  - literal_expression_end_indentation
+  - lower_acl_than_parent
+  - modifier_order
+  - nimble_operator
+  - nslocalizedstring_key
+  - number_separator
+  - object_literal
+  - operator_usage_whitespace
+  - overridden_super_call
+  - override_in_extension
+  - pattern_matching_keywords
+  - prefer_self_type_over_type_of_self
+  - private_action
+  - private_outlet
+  - prohibited_interface_builder
+  - prohibited_super_call
+  - quick_discouraged_call
+  - quick_discouraged_focused_test
+  - quick_discouraged_pending_test
+  - redundant_nil_coalescing
+  - redundant_type_annotation
+  - required_enum_case
+  - single_test_class
+  - sorted_first_last
+  - sorted_imports
+  - static_operator
+  - strict_fileprivate
+  - strong_iboutlet
+  - toggle_bool
+  - trailing_closure
+  - unneeded_parentheses_in_closure_argument
+  - untyped_error_in_catch
+  - vertical_parameter_alignment_on_call
+  - vertical_whitespace_closing_braces
+  - vertical_whitespace_opening_braces
+  - yoda_condition
+
+# Disabled rules
+disabled_rules:
+  - todo # TODOs are acceptable during development
+  - line_length # Handled by line_length configuration below
+
+# Rule configurations
+
+# Identifier naming rules
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  max_length:
+    warning: 50
+    error: 60
+  excluded:
+    - id
+    - ID
+    - db
+    - to
+    - T
+    - D
+
+# Type naming rules
+type_name:
+  min_length:
+    warning: 3
+    error: 2
+  max_length:
+    warning: 50
+    error: 60
+
+# Line length
+line_length:
+  warning: 120
+  error: 150
+  ignores_comments: true
+  ignores_urls: true
+  ignores_function_declarations: true
+  ignores_interpolated_strings: true
+
+# File length
+file_length:
+  warning: 500
+  error: 1000
+  ignore_comment_only_lines: true
+
+# Function body length
+function_body_length:
+  warning: 50
+  error: 100
+
+# Function parameter count
+function_parameter_count:
+  warning: 5
+  error: 8
+
+# Type body length
+type_body_length:
+  warning: 300
+  error: 500
+
+# Cyclomatic complexity
+cyclomatic_complexity:
+  warning: 10
+  error: 20
+  ignores_case_statements: true
+
+# Nesting depth
+nesting:
+  type_level:
+    warning: 2
+  statement_level:
+    warning: 5
+
+# Large tuple
+large_tuple:
+  warning: 3
+  error: 4
+
+# Trailing whitespace
+trailing_whitespace:
+  ignores_empty_lines: true
+  ignores_comments: false
+
+# Vertical whitespace
+vertical_whitespace:
+  max_empty_lines: 2
+
+# File header (optional - uncomment and customize if you want to enforce file headers)
+# file_header:
+#   required_pattern: |
+#                     \/\/
+#                     \/\/  .*?\.swift
+#                     \/\/  
+#                     \/\/
+#                     \/\/  Created by .* on \d{1,2}\/\d{1,2}\/\d{2}\.
+#                     \/\/
+
+# Custom rules
+custom_rules:
+  # Encourage use of modern Swift string methods
+  prefer_modern_string_methods:
+    name: "Prefer Modern String Methods"
+    regex: '\.replacingOccurrences\(of:'
+    message: "Use .replacing(_:with:) instead of .replacingOccurrences(of:with:)"
+    severity: warning
+
+  # Discourage force unwrapping
+  force_unwrap:
+    name: "Force Unwrap"
+    regex: '(\w+!)(?![^"]*")'
+    message: "Avoid force unwrapping. Use optional binding or guard statements."
+    severity: warning
+    
+  # Discourage force try
+  force_try:
+    name: "Force Try"
+    regex: 'try!'
+    message: "Avoid force try. Handle errors appropriately."
+    severity: warning
+
+  # Encourage async/await over completion handlers
+  prefer_async_await:
+    name: "Prefer Async/Await"
+    regex: '@escaping.*completion|completionHandler'
+    message: "Consider using async/await instead of completion handlers for new code."
+    severity: warning
+
+  # Discourage print statements (use proper logging)
+  no_print:
+    name: "No Print Statements"
+    regex: '\bprint\('
+    message: "Use proper logging instead of print statements in production code."
+    severity: warning
+    excluded: ".*Tests\\.swift"
+
+  # Encourage explicit self in closures
+  explicit_self_in_closures:
+    name: "Explicit Self in Closures"
+    regex: '(?<=\{)[^\}]*(?<!self\.)\b(?:get|set|willSet|didSet)\b'
+    message: "Use explicit self in closures to avoid retain cycles."
+    severity: warning
+
+# Reporter type (xcode, json, csv, checkstyle, junit, html, emoji, sonarqube, markdown)
+reporter: "xcode"
+
+# Automatically correct violations when possible
+# Enable this when running: swiftlint --fix
+autocorrect: false
+
+# Only show errors
+# Uncomment to show only errors, hiding warnings
+# only_rules: []
+
+# Warnings are treated as errors
+# Uncomment to make warnings fail the build
+# strict: true
+
+# Exclude specific violations by file path
+excluded_violations:
+  - file_length:
+      - "Tests/**/*.swift"
+  - function_body_length:
+      - "Tests/**/*.swift"
+  - type_body_length:
+      - "Tests/**/*.swift"

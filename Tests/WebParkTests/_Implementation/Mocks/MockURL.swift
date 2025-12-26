@@ -1,6 +1,6 @@
 //
 //  MockURL.swift
-//  
+//
 //
 //  Created by Daniel Giralte on 5/29/24.
 //
@@ -10,18 +10,18 @@ import Foundation
 // special thanks to this gist https://gist.github.com/soujohnreis/7c86965efbbb2297d4db3f84027327c1
 class URLProtocolMock: URLProtocol {
     /// Dictionary maps URLs to tuples of error, data, and response
-    nonisolated(unsafe) private static var mockURLs: [URL: (error: Error?, data: Data?, response: HTTPURLResponse?)] = [:]
+    nonisolated(unsafe) private static var mockURLs: [URL: (error: (any Error)?, data: Data?, response: HTTPURLResponse?)] = [:]
     private static let lock = NSLock()
 
     // Thread-safe APIs to mutate and read mocks
-    static func setMock(_ entry: (error: Error?, data: Data?, response: HTTPURLResponse?), for url: URL) {
+    static func setMock(_ entry: (error: (any Error)?, data: Data?, response: HTTPURLResponse?), for url: URL) {
         lock.lock()
         mockURLs[url] = entry
         lock.unlock()
     }
     
     /// Set multiple mock entries at once. Each element is a pair of (URL, entry).
-    static func setMock(_ entries: [(URL, (error: Error?, data: Data?, response: HTTPURLResponse?))]) {
+    static func setMock(_ entries: [(URL, (error: (any Error)?, data: Data?, response: HTTPURLResponse?))]) {
         lock.lock()
         for (url, entry) in entries {
             mockURLs[url] = entry
@@ -44,7 +44,7 @@ class URLProtocolMock: URLProtocol {
         lock.unlock()
     }
 
-    static func mock(for url: URL) -> (error: Error?, data: Data?, response: HTTPURLResponse?)? {
+    static func mock(for url: URL) -> (error: (any Error)?, data: Data?, response: HTTPURLResponse?)? {
         lock.lock()
         defer { lock.unlock() }
         return mockURLs[url]
@@ -52,12 +52,12 @@ class URLProtocolMock: URLProtocol {
     
     override class func canInit(with request: URLRequest) -> Bool {
         // Handle all types of requests
-        return true
+        true
     }
     
     override class func canonicalRequest(for request: URLRequest) -> URLRequest {
         // Required to be implemented here. Just return what is passed
-        return request
+        request
     }
     
     override func startLoading() {

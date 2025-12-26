@@ -20,11 +20,7 @@ let package = Package(
             name: "WebPark",
             dependencies: [],
             swiftSettings: [
-                .enableUpcomingFeature("BareSlashRegexLiterals"),
-                .enableUpcomingFeature("ConciseMagicFile"),
                 .enableUpcomingFeature("ExistentialAny"),
-                .enableUpcomingFeature("ForwardTrailingClosures"),
-                .enableUpcomingFeature("ImplicitOpenExistentials"),
                 .enableUpcomingFeature("StrictConcurrency"),
             ]
         ),
@@ -32,11 +28,7 @@ let package = Package(
             name: "WebParkTests",
             dependencies: ["WebPark"],
             swiftSettings: [
-                .enableUpcomingFeature("BareSlashRegexLiterals"),
-                .enableUpcomingFeature("ConciseMagicFile"),
                 .enableUpcomingFeature("ExistentialAny"),
-                .enableUpcomingFeature("ForwardTrailingClosures"),
-                .enableUpcomingFeature("ImplicitOpenExistentials"),
                 .enableUpcomingFeature("StrictConcurrency"),
             ]
         ),

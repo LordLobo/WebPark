@@ -72,4 +72,3 @@ struct WebPark_post_Tests {
         }
     }
 }
-

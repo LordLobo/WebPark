@@ -9,9 +9,7 @@ import Foundation
 
 @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 public extension WebPark {
-        
-    func get<T>(_ endpoint: String) async throws -> T where T:Codable {
-        
+    func get<T>(_ endpoint: String) async throws -> T where T: Codable {
         guard let request = try createRequest("GET", endpoint: endpoint) else {
             throw WebParkError.unableToMakeRequest
         }
@@ -27,8 +25,7 @@ public extension WebPark {
     }
     
     func get<T>(_ endpoint: String,
-                queryItems: [URLQueryItem]) async throws -> T where T:Codable {
-        
+                queryItems: [URLQueryItem]) async throws -> T where T: Codable {
         guard let request = try createRequest("GET",
                                               endpoint: endpoint,
                                               queryItems: queryItems) else {
@@ -44,5 +41,4 @@ public extension WebPark {
         
         return try Coder.decode(data)
     }
-    
 }

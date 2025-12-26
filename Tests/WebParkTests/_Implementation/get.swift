@@ -56,7 +56,7 @@ func BuildGETURLSession() -> URLSession {
 
 extension Implementation {
     func getCats() async throws -> [Cat] {
-        return try await get("/cats")
+        try await get("/cats")
     }
     
     func getCatsQuery() async throws -> [Cat] {
@@ -65,6 +65,6 @@ extension Implementation {
     }
     
     func getCats401() async throws -> [Cat] {
-        return try await get("/catserror")
+        try await get("/catserror")
     }
 }

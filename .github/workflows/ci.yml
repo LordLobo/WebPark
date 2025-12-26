@@ -1,0 +1,288 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_16.0.app/Contents/Developer
+
+jobs:
+  swiftlint:
+    name: SwiftLint
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Install SwiftLint
+        run: brew install swiftlint
+      
+      - name: Run SwiftLint
+        run: swiftlint lint --strict
+
+  test-macos:
+    name: Test macOS
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app
+      
+      - name: Show Swift version
+        run: swift --version
+      
+      - name: Build
+        run: swift build -v
+      
+      - name: Run tests
+        run: swift test -v --enable-code-coverage
+      
+      - name: Generate coverage report
+        run: |
+          xcrun llvm-cov export -format="lcov" \
+            .build/debug/WebParkPackageTests.xctest/Contents/MacOS/WebParkPackageTests \
+            -instr-profile .build/debug/codecov/default.profdata > coverage.lcov
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.lcov
+          flags: macos
+          fail_ci_if_error: false
+
+  test-ios:
+    name: Test iOS
+    runs-on: macos-14
+    strategy:
+      matrix:
+        destination:
+          - 'platform=iOS Simulator,OS=17.0,name=iPhone 15'
+          - 'platform=iOS Simulator,OS=18.0,name=iPhone 16'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app
+      
+      - name: List available simulators
+        run: xcrun simctl list devices available
+      
+      - name: Build and Test
+        run: |
+          xcodebuild test \
+            -scheme WebPark \
+            -destination '${{ matrix.destination }}' \
+            -enableCodeCoverage YES \
+            -derivedDataPath .build/ios-test
+      
+      - name: Upload iOS test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: ios-test-results-${{ strategy.job-index }}
+          path: .build/ios-test/Logs/Test/*.xcresult
+
+  test-tvos:
+    name: Test tvOS
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app
+      
+      - name: Build and Test
+        run: |
+          xcodebuild test \
+            -scheme WebPark \
+            -destination 'platform=tvOS Simulator,OS=17.0,name=Apple TV' \
+            -enableCodeCoverage YES
+
+  test-watchos:
+    name: Build watchOS
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app
+      
+      - name: Build (watchOS doesn't support XCTest)
+        run: |
+          xcodebuild build \
+            -scheme WebPark \
+            -destination 'platform=watchOS Simulator,OS=10.0,name=Apple Watch Series 9 (45mm)'
+
+  test-linux:
+    name: Test Linux
+    runs-on: ubuntu-latest
+    container:
+      image: swift:6.2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Show Swift version
+        run: swift --version
+      
+      - name: Build
+        run: swift build -v
+      
+      - name: Run tests
+        run: swift test -v
+
+  build-documentation:
+    name: Build Documentation
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app
+      
+      - name: Build DocC Documentation
+        run: |
+          swift package \
+            --allow-writing-to-directory ./docs \
+            generate-documentation \
+            --target WebPark \
+            --output-path ./docs \
+            --transform-for-static-hosting \
+            --hosting-base-path WebPark
+      
+      - name: Upload documentation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: docs
+
+  check-formatting:
+    name: Check Code Formatting
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Install swift-format
+        run: brew install swift-format
+      
+      - name: Check formatting
+        run: |
+          swift-format lint --recursive Sources Tests || true
+          echo "Note: swift-format is informational only and won't fail the build"
+
+  analyze:
+    name: Static Analysis
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app
+      
+      - name: Run xcodebuild analyze
+        run: |
+          swift build --build-tests
+          # Static analysis
+          xcodebuild analyze \
+            -scheme WebPark \
+            -destination 'platform=macOS' || true
+
+  check-package:
+    name: Validate Package
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Validate Swift Package
+        run: swift package diagnose
+      
+      - name: Check Package Dependencies
+        run: swift package show-dependencies
+
+  integration-test:
+    name: Integration Tests
+    runs-on: macos-14
+    needs: [test-macos, test-ios]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Run integration tests
+        run: |
+          swift test --filter WebParkIntegrationTests || true
+          echo "Integration tests placeholder - implement when needed"
+
+  # Optional: Deploy documentation to GitHub Pages
+  deploy-docs:
+    name: Deploy Documentation
+    runs-on: macos-14
+    needs: build-documentation
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Download documentation
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation
+          path: docs
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          cname: webpark.yourdomain.com  # Optional: set your custom domain
+
+  # Create release on tag push
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [test-macos, test-ios, test-tvos, test-watchos, test-linux]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      
+      - name: Extract changelog
+        id: changelog
+        run: |
+          # Extract the section for this version from CHANGELOG.md
+          VERSION=${{ steps.version.outputs.VERSION }}
+          CHANGELOG=$(awk "/## \[$VERSION\]/,/## \[/{if(/## \[/&&++c==2)exit;if(c==1)print}" CHANGELOG.md)
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ steps.version.outputs.VERSION }}
+          body: ${{ steps.changelog.outputs.CHANGELOG }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

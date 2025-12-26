@@ -18,9 +18,28 @@ let package = Package(
     targets: [
         .target(
             name: "WebPark",
-            dependencies: []),
+            dependencies: [],
+            swiftSettings: [
+                .enableUpcomingFeature("BareSlashRegexLiterals"),
+                .enableUpcomingFeature("ConciseMagicFile"),
+                .enableUpcomingFeature("ExistentialAny"),
+                .enableUpcomingFeature("ForwardTrailingClosures"),
+                .enableUpcomingFeature("ImplicitOpenExistentials"),
+                .enableUpcomingFeature("StrictConcurrency"),
+            ]
+        ),
         .testTarget(
             name: "WebParkTests",
-            dependencies: ["WebPark"]),
-    ]
+            dependencies: ["WebPark"],
+            swiftSettings: [
+                .enableUpcomingFeature("BareSlashRegexLiterals"),
+                .enableUpcomingFeature("ConciseMagicFile"),
+                .enableUpcomingFeature("ExistentialAny"),
+                .enableUpcomingFeature("ForwardTrailingClosures"),
+                .enableUpcomingFeature("ImplicitOpenExistentials"),
+                .enableUpcomingFeature("StrictConcurrency"),
+            ]
+        ),
+    ],
+    swiftLanguageModes: [.v6]
 )

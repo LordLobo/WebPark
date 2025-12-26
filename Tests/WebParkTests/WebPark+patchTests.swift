@@ -39,7 +39,7 @@ func BuildPATCHURLSession() -> URLSession {
     }
     """.data(using: .utf8)
     
-    let noError: Error? = nil
+    let noError: (any Error)? = nil
     
     URLProtocolMock.setMock([
         (patchURL, (error: noError, data: responseData, response: response200)),

@@ -33,7 +33,7 @@ func BuildPOSTURLSession() -> URLSession {
     }
     """.data(using: .utf8)
     
-    let noError: Error? = nil
+    let noError: (any Error)? = nil
     
     URLProtocolMock.setMock([
         (postURL, (error: noError, data: responseData, response: response201)),

@@ -26,7 +26,7 @@ func BuildGETURLSession() -> URLSession {
                                       httpVersion: nil,
                                       headerFields: nil)!
     
-    let noError: Error? = nil
+    let noError: (any Error)? = nil
     
     let data =
         """

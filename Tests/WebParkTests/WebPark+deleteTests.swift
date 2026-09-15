@@ -11,7 +11,7 @@ import Testing
 
 @Suite("WebPark DELETE Tests", .serialized)
 struct WebPark_delete_Tests {
-    let sut = Implementation(urlSession: BuildDELETEURLSession())
+    let sut = Implementation(urlSession: buildDELETEURLSession())
     
     @Test("DELETE with no query items does not throw")
     func deleteWithNoQueryItemsDoesNotThrow() async throws {

@@ -23,6 +23,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   root path, so generated release notes were always empty.
 - Replaced `YOUR_USERNAME` placeholders in README links and badges, and dropped the
   placeholder `cname` from the documentation deploy job.
+- The SwiftLint CI job now passes. It had been failing (56 violations at `532704a`), partly
+  because of `.swiftlint.yml` itself:
+  - Removed the `explicit_self_in_closures` custom rule. Its regex matched any `{`
+    followed by `get`/`set`, so it flagged `{ get }` protocol requirements and every
+    `func get(...)` — 20 false positives and no true ones. Explicit `self` also does not
+    prevent retain cycles; `[weak self]` does.
+  - Removed the `autocorrect` and `excluded_violations` keys and `nesting.statement_level`,
+    none of which SwiftLint recognizes; each emitted a config warning and did nothing.
+  - `line_length` was configured but also listed in `disabled_rules`, so the 120/150
+    thresholds were never applied. Removed from `disabled_rules` and fixed the two lines
+    that then exceeded 120.
+  - `file_name` now understands the `WebPark+get.swift` and `ArrayExtensions.swift`
+    conventions via `suffix_pattern`, and skips `Tests`.
+  - `type_name` now allows `_` for the `WebPark_get_Tests` suite convention.
+- Renamed test session builders from `BuildGETURLSession()` to `buildGETURLSession()` and
+  the `testTokenService` fixture to `TestTokenService` to follow Swift naming.
+- Replaced `"...".data(using: .utf8)` with the non-optional `Data("...".utf8)` in six
+  test fixtures.
+- `URLRequest` extension now uses `public extension` instead of marking each member
+  `public` individually.
+- Extracted `URLProtocolMock.Entry` typealias for the repeated
+  `(error:data:response:)` mock tuple.
 
 ### Added
 - `Void`-returning overloads of `post(_:body:)`, `put(_:body:)`, and `patch(_:body:)` for

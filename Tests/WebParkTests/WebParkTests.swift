@@ -13,9 +13,9 @@ import Testing
 struct WebParkTests {
     @Test("Create request with valid parameters")
     func createRequestWithValidRequest() async throws {
-        let sut = Implementation(tokenService: testTokenService(),
+        let sut = Implementation(tokenService: TestTokenService(),
                                  baseURL: "http://google.com/",
-                                 urlSession: BuildGETURLSession())
+                                 urlSession: buildGETURLSession())
         
         let result = try sut.createRequest("GET", endpoint: "foo")
 
@@ -35,7 +35,7 @@ struct WebParkTests {
     
     @Test("Create request with valid parameters builds correct request")
     func createRequestWithValidParameters() async throws {
-        let sut = Implementation(tokenService: testTokenService(),
+        let sut = Implementation(tokenService: TestTokenService(),
                                  baseURL: "https://api.example.com",
                                  urlSession: URLSession.shared)
         

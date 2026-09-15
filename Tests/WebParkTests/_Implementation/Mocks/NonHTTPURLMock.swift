@@ -39,7 +39,7 @@ class NonHTTPURLProtocolMock: URLProtocol {
     }
 }
 
-func BuildNonHTTPURLSession() -> URLSession {
+func buildNonHTTPURLSession() -> URLSession {
     let configuration = URLSessionConfiguration.ephemeral
     configuration.protocolClasses = [NonHTTPURLProtocolMock.self]
 

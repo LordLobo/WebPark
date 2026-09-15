@@ -27,9 +27,9 @@ struct CoderTests {
     
     @Test("Decode with valid data returns object")
     func decodeWithValidData() async throws {
-        let jsonData = """
+        let jsonData = Data("""
         {"name": "Fluffy", "color": "Black"}
-        """.data(using: .utf8)!
+        """.utf8)
         
         let cat: Cat = try Coder.decode(jsonData)
         
@@ -39,7 +39,7 @@ struct CoderTests {
     
     @Test("Decode with invalid data throws error")
     func decodeWithInvalidData() async throws {
-        let invalidData = "not json".data(using: .utf8)!
+        let invalidData = Data("not json".utf8)
         
         #expect(throws: WebParkError.self) {
             let _: Cat = try Coder.decode(invalidData)

@@ -9,19 +9,22 @@ import Foundation
 
 // special thanks to this gist https://gist.github.com/soujohnreis/7c86965efbbb2297d4db3f84027327c1
 class URLProtocolMock: URLProtocol {
+    /// The error, data, and response to return for a mocked URL.
+    typealias Entry = (error: (any Error)?, data: Data?, response: HTTPURLResponse?)
+
     /// Dictionary maps URLs to tuples of error, data, and response
-    nonisolated(unsafe) private static var mockURLs: [URL: (error: (any Error)?, data: Data?, response: HTTPURLResponse?)] = [:]
+    nonisolated(unsafe) private static var mockURLs: [URL: Entry] = [:]
     private static let lock = NSLock()
 
     // Thread-safe APIs to mutate and read mocks
-    static func setMock(_ entry: (error: (any Error)?, data: Data?, response: HTTPURLResponse?), for url: URL) {
+    static func setMock(_ entry: Entry, for url: URL) {
         lock.lock()
         mockURLs[url] = entry
         lock.unlock()
     }
-    
+
     /// Set multiple mock entries at once. Each element is a pair of (URL, entry).
-    static func setMock(_ entries: [(URL, (error: (any Error)?, data: Data?, response: HTTPURLResponse?))]) {
+    static func setMock(_ entries: [(URL, Entry)]) {
         lock.lock()
         for (url, entry) in entries {
             mockURLs[url] = entry
@@ -44,7 +47,7 @@ class URLProtocolMock: URLProtocol {
         lock.unlock()
     }
 
-    static func mock(for url: URL) -> (error: (any Error)?, data: Data?, response: HTTPURLResponse?)? {
+    static func mock(for url: URL) -> Entry? {
         lock.lock()
         defer { lock.unlock() }
         return mockURLs[url]

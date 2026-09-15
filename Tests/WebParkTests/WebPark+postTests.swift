@@ -9,7 +9,7 @@ import Foundation
 import Testing
 @testable import WebPark
 
-func BuildPOSTURLSession() -> URLSession {
+func buildPOSTURLSession() -> URLSession {
     // Don't call removeAllMocks() - let different test suites coexist
     // Use unique URLs for POST tests to avoid conflicts with other suites
     
@@ -26,12 +26,12 @@ func BuildPOSTURLSession() -> URLSession {
                                       httpVersion: nil,
                                       headerFields: nil)!
     
-    let responseData = """
+    let responseData = Data("""
     {
         "name": "Fluffy",
         "color": "Gray"
     }
-    """.data(using: .utf8)
+    """.utf8)
     
     let noError: (any Error)? = nil
     
@@ -48,7 +48,7 @@ func BuildPOSTURLSession() -> URLSession {
 
 @Suite("WebPark POST Tests", .serialized)
 struct WebPark_post_Tests {
-    let sut = Implementation(urlSession: BuildPOSTURLSession())
+    let sut = Implementation(urlSession: buildPOSTURLSession())
     
     @Test("POST with valid data returns created object")
     func postWithValidDataReturnsCreatedObject() async throws {

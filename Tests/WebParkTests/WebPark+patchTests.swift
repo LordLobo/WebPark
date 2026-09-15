@@ -9,7 +9,7 @@ import Foundation
 import Testing
 @testable import WebPark
 
-func BuildPATCHURLSession() -> URLSession {
+func buildPATCHURLSession() -> URLSession {
     // Don't call removeAllMocks() - let different test suites coexist
     // Use unique URLs for PATCH tests to avoid conflicts with other suites
     
@@ -32,12 +32,12 @@ func BuildPATCHURLSession() -> URLSession {
                                       httpVersion: nil,
                                       headerFields: nil)!
     
-    let responseData = """
+    let responseData = Data("""
     {
         "name": "PatchedCat",
         "color": "Orange"
     }
-    """.data(using: .utf8)
+    """.utf8)
     
     let noError: (any Error)? = nil
     
@@ -55,7 +55,7 @@ func BuildPATCHURLSession() -> URLSession {
 
 @Suite("WebPark PATCH Tests", .serialized)
 struct WebPark_patch_Tests {
-    let sut = Implementation(urlSession: BuildPATCHURLSession())
+    let sut = Implementation(urlSession: buildPATCHURLSession())
     
     @Test("PATCH with valid data returns patched object")
     func patchWithValidDataReturnsPatchedObject() async throws {

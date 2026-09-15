@@ -137,8 +137,9 @@ extension WebPark {
     /// Validates that a string represents a valid HTTP or HTTPS URL
     /// This is stricter than URL(string:) and ensures proper web URLs for HTTP requests
     private func isValidHTTPURL(_ urlString: String) -> Bool {
-        // Check for invalid characters that shouldn't be in URLs (spaces, emojis, etc.)
-        let invalidCharacters = CharacterSet(charactersIn: " \t\n\r\u{00A0}🚀🎉") // Common invalid chars including non-breaking space and emojis
+        // Check for invalid characters that shouldn't be in URLs: whitespace, the
+        // non-breaking space, and a couple of representative emoji.
+        let invalidCharacters = CharacterSet(charactersIn: " \t\n\r\u{00A0}🚀🎉")
         if urlString.rangeOfCharacter(from: invalidCharacters) != nil {
             return false
         }

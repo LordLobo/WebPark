@@ -7,7 +7,7 @@
 import Foundation
 @testable import WebPark
 
-func BuildDELETEURLSession() -> URLSession {
+func buildDELETEURLSession() -> URLSession {
     // Don't call removeAllMocks() - let different test suites coexist
     // Each suite uses unique URLs so there's no conflict
     

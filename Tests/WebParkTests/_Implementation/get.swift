@@ -8,7 +8,7 @@
 import Foundation
 @testable import WebPark
 
-func BuildGETURLSession() -> URLSession {
+func buildGETURLSession() -> URLSession {
     // Don't call removeAllMocks() - let different test suites coexist
     // Each suite uses unique URLs so there's no conflict
     
@@ -28,8 +28,7 @@ func BuildGETURLSession() -> URLSession {
     
     let noError: (any Error)? = nil
     
-    let data =
-        """
+    let data = Data("""
         [
             {
                 "name": "Yuki",
@@ -40,7 +39,7 @@ func BuildGETURLSession() -> URLSession {
                 "color": "White"
             }
         ]
-        """.data(using: .utf8)
+        """.utf8)
     
     URLProtocolMock.setMock([
         (getMockBaseGETURL, (error: noError, data: data, response: response200)),

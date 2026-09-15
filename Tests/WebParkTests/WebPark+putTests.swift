@@ -9,7 +9,7 @@ import Foundation
 import Testing
 @testable import WebPark
 
-func BuildPUTURLSession() -> URLSession {
+func buildPUTURLSession() -> URLSession {
     // Don't call removeAllMocks() - let different test suites coexist
     // Use unique URLs for PUT tests to avoid conflicts with other suites
     
@@ -26,12 +26,12 @@ func BuildPUTURLSession() -> URLSession {
                                       httpVersion: nil,
                                       headerFields: nil)!
     
-    let responseData = """
+    let responseData = Data("""
     {
         "name": "UpdatedCat",
         "color": "Black"
     }
-    """.data(using: .utf8)
+    """.utf8)
     
     let noError: (any Error)? = nil
     
@@ -48,7 +48,7 @@ func BuildPUTURLSession() -> URLSession {
 
 @Suite("WebPark PUT Tests", .serialized)
 struct WebPark_put_Tests {
-    let sut = Implementation(urlSession: BuildPUTURLSession())
+    let sut = Implementation(urlSession: buildPUTURLSession())
     
     @Test("PUT with valid data returns updated object")
     func putWithValidDataReturnsUpdatedObject() async throws {

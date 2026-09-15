@@ -10,7 +10,7 @@ import Foundation
 import Testing
 @testable import WebPark
 
-private func BuildNoContentURLSession() -> URLSession {
+private func buildNoContentURLSession() -> URLSession {
     let noContentURL = URL(string: "https://lordlobo.mockapi.com/nocontent")!
 
     let response204 = HTTPURLResponse(url: noContentURL,
@@ -33,7 +33,7 @@ struct WebPark_responseHandling_Tests {
 
     @Test("A non-HTTP response throws rather than being decoded as success")
     func nonHTTPResponseThrows() async throws {
-        let sut = Implementation(urlSession: BuildNonHTTPURLSession())
+        let sut = Implementation(urlSession: buildNonHTTPURLSession())
 
         await #expect(throws: WebParkError.unexpectedResponse) {
             let _: Cat = try await sut.get("/cats")
@@ -44,7 +44,7 @@ struct WebPark_responseHandling_Tests {
 
     @Test("POST to a 204 endpoint succeeds when the response body is discarded")
     func postNoContent() async throws {
-        let sut = Implementation(urlSession: BuildNoContentURLSession())
+        let sut = Implementation(urlSession: buildNoContentURLSession())
         let cat = Cat(name: "Yuki", color: "Brown")
 
         try await sut.post("/nocontent", body: cat)
@@ -52,7 +52,7 @@ struct WebPark_responseHandling_Tests {
 
     @Test("PUT to a 204 endpoint succeeds when the response body is discarded")
     func putNoContent() async throws {
-        let sut = Implementation(urlSession: BuildNoContentURLSession())
+        let sut = Implementation(urlSession: buildNoContentURLSession())
         let cat = Cat(name: "Yuki", color: "Brown")
 
         try await sut.put("/nocontent", body: cat)
@@ -60,7 +60,7 @@ struct WebPark_responseHandling_Tests {
 
     @Test("PATCH to a 204 endpoint succeeds when the response body is discarded")
     func patchNoContent() async throws {
-        let sut = Implementation(urlSession: BuildNoContentURLSession())
+        let sut = Implementation(urlSession: buildNoContentURLSession())
         let cat = Cat(name: "Yuki", color: "Brown")
 
         try await sut.patch("/nocontent", body: cat)
@@ -68,7 +68,7 @@ struct WebPark_responseHandling_Tests {
 
     @Test("Decoding an empty 204 body still fails on the value-returning overload")
     func postNoContentDecodingFails() async throws {
-        let sut = Implementation(urlSession: BuildNoContentURLSession())
+        let sut = Implementation(urlSession: buildNoContentURLSession())
         let cat = Cat(name: "Yuki", color: "Brown")
 
         await #expect(throws: WebParkError.self) {
@@ -95,7 +95,7 @@ struct WebPark_responseHandling_Tests {
     @Test("Error messages survive a real catch block")
     func errorMessageInCatchBlock() async throws {
         let sut = Implementation(baseURL: "https://lordlobo.mockapi.com",
-                                 urlSession: BuildGETURLSession())
+                                 urlSession: buildGETURLSession())
 
         do {
             let _: [Cat] = try await sut.get("/catserror")

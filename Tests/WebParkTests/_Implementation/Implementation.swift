@@ -13,7 +13,7 @@ struct Cat: Codable {
     var color: String
 }
 
-struct testTokenService: WebParkTokenServiceProtocol {
+struct TestTokenService: WebParkTokenServiceProtocol {
     var token: String { "token" }
     
     func refreshToken() async throws {

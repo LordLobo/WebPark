@@ -7,20 +7,20 @@
 
 import Foundation
 
-extension URLRequest {    
-    public func addingBearerAuthorization(token: String) -> URLRequest {
+public extension URLRequest {
+    func addingBearerAuthorization(token: String) -> URLRequest {
         var request = self
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         return request
     }
-    
-    public func acceptingJSON() -> URLRequest {
+
+    func acceptingJSON() -> URLRequest {
         var request = self
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         return request
     }
 
-    public func sendingJSON() -> URLRequest {
+    func sendingJSON() -> URLRequest {
         var request = self
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         return request

@@ -84,7 +84,6 @@ opt_in_rules:
 # Disabled rules
 disabled_rules:
   - todo # TODOs are acceptable during development
-  - line_length # Handled by line_length configuration below
 
 # Rule configurations
 
@@ -112,6 +111,19 @@ type_name:
   max_length:
     warning: 50
     error: 60
+  # Test suites use the WebPark_get_Tests convention to mirror the WebPark+get.swift
+  # file they exercise.
+  allowed_symbols:
+    - "_"
+
+# File naming rules
+file_name:
+  # Matches this project's two conventions: `WebPark+get.swift` holding `extension WebPark`,
+  # and `ArrayExtensions.swift` holding `extension Array`.
+  suffix_pattern: "\\+.*|Extensions"
+  # Test files are suites and fixtures rather than one-type-per-file declarations.
+  excluded_paths:
+    - Tests
 
 # Line length
 line_length:
@@ -153,8 +165,6 @@ cyclomatic_complexity:
 nesting:
   type_level:
     warning: 2
-  statement_level:
-    warning: 5
 
 # Large tuple
 large_tuple:
@@ -218,33 +228,15 @@ custom_rules:
     severity: warning
     excluded: ".*Tests\\.swift"
 
-  # Encourage explicit self in closures
-  explicit_self_in_closures:
-    name: "Explicit Self in Closures"
-    regex: '(?<=\{)[^\}]*(?<!self\.)\b(?:get|set|willSet|didSet)\b'
-    message: "Use explicit self in closures to avoid retain cycles."
-    severity: warning
-
 # Reporter type (xcode, json, csv, checkstyle, junit, html, emoji, sonarqube, markdown)
 reporter: "xcode"
 
-# Automatically correct violations when possible
-# Enable this when running: swiftlint --fix
-autocorrect: false
-
-# Only show errors
-# Uncomment to show only errors, hiding warnings
-# only_rules: []
-
-# Warnings are treated as errors
-# Uncomment to make warnings fail the build
-# strict: true
-
-# Exclude specific violations by file path
-excluded_violations:
-  - file_length:
-      - "Tests/**/*.swift"
-  - function_body_length:
-      - "Tests/**/*.swift"
-  - type_body_length:
-      - "Tests/**/*.swift"
+# Note: `swiftlint --fix` is invoked from the command line (see `make lint-fix`); there is
+# no `autocorrect` configuration key.
+#
+# Note: `--strict` is passed by CI rather than configured here.
+#
+# The length rules (file_length, function_body_length, type_body_length) take only
+# severity thresholds and cannot be scoped to a path. To relax them for tests, add a
+# nested Tests/.swiftlint.yml rather than an `excluded_violations` key, which SwiftLint
+# does not recognize.

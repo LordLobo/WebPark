@@ -11,8 +11,8 @@ import Testing
 
 @Suite("WebPark GET Tests", .serialized)
 struct WebPark_get_Tests {
-    let sut = Implementation(tokenService: testTokenService(),
-                             urlSession: BuildGETURLSession())
+    let sut = Implementation(tokenService: TestTokenService(),
+                             urlSession: buildGETURLSession())
     
     @Test("GET with no query items returns data")
     func getWithNoQueryItemsReturnsData() async throws {

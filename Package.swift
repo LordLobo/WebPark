@@ -1,13 +1,13 @@
-// swift-tools-version: 6.2
+// swift-tools-version: 6.4
 import PackageDescription
 
 let package = Package(
     name: "WebPark",
     platforms: [
-        .macOS(.v12),
-        .iOS(.v15),
-        .tvOS(.v15),
-        .watchOS(.v8)
+        .macOS(.v26),
+        .iOS(.v26),
+        .tvOS(.v26),
+        .watchOS(.v26)
     ],
     products: [
         .library(
@@ -21,7 +21,6 @@ let package = Package(
             dependencies: [],
             swiftSettings: [
                 .enableUpcomingFeature("ExistentialAny"),
-                .enableUpcomingFeature("StrictConcurrency"),
             ]
         ),
         .testTarget(
@@ -29,7 +28,6 @@ let package = Package(
             dependencies: ["WebPark"],
             swiftSettings: [
                 .enableUpcomingFeature("ExistentialAny"),
-                .enableUpcomingFeature("StrictConcurrency"),
             ]
         ),
     ],

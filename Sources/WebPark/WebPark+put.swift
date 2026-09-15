@@ -1,31 +1,28 @@
 //
 //  WebPark+put.swift
-//  
+//
 //
 //  Created by Daniel Giralte on 6/5/22.
 //
 
 import Foundation
 
-@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
 public extension WebPark {
     func put<T, D>(_ endpoint: String,
                    body: D) async throws -> T where T: Codable, D: Codable {
-        guard var request = try createRequest("PUT",
-                                                     endpoint: endpoint,
-                                                     isJSON: true) else {
-            throw WebParkError.unableToMakeRequest
-        }
-        
-        request.httpBody = try Coder.encode(body)
-        
-        let (data, response) = try await urlSession.data(for: request)
-        
-        if let res = response as? HTTPURLResponse,
-           res.statusCode >= 400 {
-            throw WebParkHttpError(res.statusCode)
-        }
-            
+        let request = try createRequest("PUT", endpoint: endpoint, body: body)
+        let data = try await perform(request)
+
         return try Coder.decode(data)
+    }
+
+    /// Sends a PUT request and discards the response body.
+    ///
+    /// Use this when the endpoint replies with no content, such as `204 No Content`.
+    /// Decoding an empty body through the value-returning overload would fail.
+    func put<D>(_ endpoint: String,
+                body: D) async throws where D: Codable {
+        let request = try createRequest("PUT", endpoint: endpoint, body: body)
+        _ = try await perform(request)
     }
 }

@@ -33,8 +33,10 @@ public protocol WebPark {
     ///
     /// When present, `createRequest(_:endpoint:queryItems:isJSON:)` automatically adds an
     /// `Authorization: Bearer <token>` header using `tokenService.token`.
-    /// Implementations may call `tokenService.refreshToken()` upon receiving an HTTP 401
-    /// to refresh credentials and retry as appropriate.
+    ///
+    /// - Note: WebPark does not currently refresh tokens for you. A `401` surfaces as
+    ///   `WebParkHttpError`; call `tokenService.refreshToken()` and retry from your own
+    ///   code if that is the behavior you want.
     var tokenService: (any WebParkTokenServiceProtocol)? { get }
 }
 
@@ -58,11 +60,13 @@ public protocol WebParkAsyncTokenServiceProtocol: Sendable {
 extension WebPark {
     var urlSession: URLSession { URLSession.shared }
     
-    // Synchronous version for backward compatibility (mainly for tests)
+    /// Builds a request for `endpoint`, attaching a bearer token and JSON content type as configured.
+    ///
+    /// Every failure path throws a `WebParkError`, so a returned request is always usable.
     internal func createRequest(_ method: String,
                                 endpoint: String,
                                 queryItems: [URLQueryItem] = [],
-                                isJSON: Bool = false) throws -> URLRequest? {
+                                isJSON: Bool = false) throws -> URLRequest {
         // Construct the full URL string
         let fullURLString = self.baseURL + endpoint
         
@@ -98,48 +102,38 @@ extension WebPark {
         
         return request
     }
-    
-    // Async version for production use with async token services
-    internal func createRequestAsync(_ method: String,
+
+    /// Builds a JSON request whose body is the encoded form of `body`.
+    internal func createRequest(_ method: String,
                                 endpoint: String,
-                                queryItems: [URLQueryItem] = [],
-                                isJSON: Bool = false) async throws -> URLRequest? {
-        // Construct the full URL string
-        let fullURLString = self.baseURL + endpoint
-        
-        // Validate this is a proper HTTP/HTTPS URL since this is an HTTP library
-        guard isValidHTTPURL(fullURLString) else {
-            throw WebParkError.unableToMakeURL
-        }
-        
-        // Create URLComponents for query parameter handling
-        guard let urlComponents = URLComponents(string: fullURLString) else {
-            throw WebParkError.unableToMakeURL
-        }
-        
-        var finalComponents = urlComponents
-        if queryItems.hasItems {
-            finalComponents.queryItems = queryItems
-        }
-        
-        guard let url = finalComponents.url else { 
-            throw WebParkError.unableToMakeURL
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = method
-        
-        if let tokenService {
-            request = request.addingBearerAuthorization(token: tokenService.token)
-        }
-        
-        if isJSON {
-            request = request.sendingJSON()
-        }
-        
+                                body: some Codable) throws -> URLRequest {
+        var request = try createRequest(method, endpoint: endpoint, isJSON: true)
+        request.httpBody = try Coder.encode(body)
+
         return request
     }
-    
+
+    /// Sends `request` and returns its body, mapping HTTP status codes of 400 and above
+    /// onto `WebParkHttpError`.
+    ///
+    /// - Throws: `WebParkError.unexpectedResponse` if the reply is not an HTTP response,
+    ///   `WebParkHttpError` for HTTP failures, or any transport error raised by `urlSession`.
+    internal func perform(_ request: URLRequest) async throws -> Data {
+        let (data, response) = try await urlSession.data(for: request)
+
+        // A non-HTTP response cannot be checked for a status code, so it must not be
+        // treated as a success and decoded.
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw WebParkError.unexpectedResponse
+        }
+
+        if httpResponse.statusCode >= 400 {
+            throw WebParkHttpError(httpResponse.statusCode)
+        }
+
+        return data
+    }
+
     /// Validates that a string represents a valid HTTP or HTTPS URL
     /// This is stricter than URL(string:) and ensures proper web URLs for HTTP requests
     private func isValidHTTPURL(_ urlString: String) -> Bool {
@@ -177,13 +171,15 @@ extension WebPark {
     }    
 }
 
-public enum WebParkError: Error, Equatable, CustomStringConvertible {
+public enum WebParkError: Error, Equatable, CustomStringConvertible, LocalizedError {
     case unableToMakeURL
     case unableToMakeRequest
     case decodeFailure(underlying: String)
     case unableToMakeAuthdRequest
     case encodeFailure(underlying: String)
-    
+    /// The server replied with something other than an HTTP response.
+    case unexpectedResponse
+
     public var description: String {
         switch self {
         case .unableToMakeURL:
@@ -196,22 +192,17 @@ public enum WebParkError: Error, Equatable, CustomStringConvertible {
             return "Unable to create authenticated request"
         case .encodeFailure(let underlying):
             return "Failed to encode request body: \(underlying)"
+        case .unexpectedResponse:
+            return "The server did not return an HTTP response"
         }
     }
-    
-    public static func == (lhs: WebParkError, rhs: WebParkError) -> Bool {
-        switch (lhs, rhs) {
-        case (.unableToMakeURL, .unableToMakeURL),
-             (.unableToMakeRequest, .unableToMakeRequest),
-             (.unableToMakeAuthdRequest, .unableToMakeAuthdRequest):
-            return true
-        case (.decodeFailure(let lhsUnderlying), .decodeFailure(let rhsUnderlying)):
-            return lhsUnderlying == rhsUnderlying
-        case (.encodeFailure(let lhsUnderlying), .encodeFailure(let rhsUnderlying)):
-            return lhsUnderlying == rhsUnderlying
-        default:
-            return false
-        }
+
+    /// Surfaces `description` through `localizedDescription`.
+    ///
+    /// Without this, the Foundation `NSError` bridge reports
+    /// "The operation couldn't be completed" whenever the error is caught as `any Error`.
+    public var errorDescription: String? {
+        description
     }
 }
 
@@ -253,20 +244,25 @@ public enum ErrorResponseCode: Int, Sendable, CaseIterable {
     }
 }
 
-public struct WebParkHttpError: Error, Equatable, CustomStringConvertible {
+public struct WebParkHttpError: Error, Equatable, CustomStringConvertible, LocalizedError {
     public let httpError: ErrorResponseCode
     public let statusCode: Int
-    
+
     public init(_ statusCode: Int) {
         self.statusCode = statusCode
         self.httpError = ErrorResponseCode(rawValue: statusCode) ?? .unhandledResponseCode
     }
-    
+
     public var description: String {
         "HTTP \(statusCode): \(httpError.description)"
     }
-    
-    public var localizedDescription: String {
+
+    /// Surfaces `description` through `localizedDescription`.
+    ///
+    /// A plain stored `localizedDescription` only applied when the value was statically
+    /// typed as `WebParkHttpError`; conforming to `LocalizedError` makes it work after
+    /// the error has been caught as `any Error`.
+    public var errorDescription: String? {
         description
     }
 }

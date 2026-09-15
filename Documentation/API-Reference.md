@@ -183,10 +183,9 @@ Indicates whether the token service is currently authenticated.
 
 ## HTTP Methods
 
-All HTTP method extensions are available on types conforming to `WebPark` and are marked with:
-```swift
-@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
-```
+All HTTP method extensions are available on types conforming to `WebPark`. They carry no
+explicit `@available` annotation — the package's deployment floor (macOS 26+, iOS 26+,
+tvOS 26+, watchOS 26+) already guarantees availability.
 
 ### GET Requests
 
@@ -394,8 +393,11 @@ try await api.delete("/users/123", queryItems: query)
 Library-specific errors for request/response handling.
 
 ```swift
-public enum WebParkError: Error, Equatable, CustomStringConvertible
+public enum WebParkError: Error, Equatable, CustomStringConvertible, LocalizedError
 ```
+
+`LocalizedError` conformance means `localizedDescription` carries the same text as
+`description` even after the error has been caught as `any Error`.
 
 #### Cases
 
@@ -439,6 +441,12 @@ Failed to create an authenticated request (token service issue).
 Failed to encode the request body.
 
 **Associated Value**: Description of the encoding error
+
+---
+
+##### `.unexpectedResponse`
+The server replied with something other than an HTTP response, so there was no status
+code to validate. The response body is never decoded in this case.
 
 ---
 

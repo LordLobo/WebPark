@@ -27,8 +27,8 @@ private func BuildNoContentURLSession() -> URLSession {
     return URLSession(configuration: configuration)
 }
 
-@Suite("WebPark Response Handling Tests")
-struct WebParkResponseHandlingTests {
+@Suite("WebPark Response Handling Tests", .serialized)
+struct WebPark_responseHandling_Tests {
     // MARK: - Non-HTTP responses
 
     @Test("A non-HTTP response throws rather than being decoded as success")

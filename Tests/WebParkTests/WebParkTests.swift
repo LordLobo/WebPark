@@ -18,8 +18,8 @@ struct WebParkTests {
                                  urlSession: BuildGETURLSession())
         
         let result = try sut.createRequest("GET", endpoint: "foo")
-        
-        #expect(result != nil, "Should create a valid request")
+
+        #expect(result.url?.absoluteString == "http://google.com/foo", "Should create a valid request")
     }
     
     @Test("Create request with invalid base URL throws error")
@@ -40,11 +40,10 @@ struct WebParkTests {
                                  urlSession: URLSession.shared)
         
         let request = try sut.createRequest("GET", endpoint: "/users")
-        let unwrappedRequest = try #require(request, "Should create a valid request")
-        
-        #expect(unwrappedRequest.httpMethod == "GET", "Should set correct HTTP method")
-        #expect(unwrappedRequest.url?.absoluteString == "https://api.example.com/users", "Should build correct URL")
-        #expect(unwrappedRequest.value(forHTTPHeaderField: "Authorization") == "Bearer token", "Should add authorization header")
+
+        #expect(request.httpMethod == "GET", "Should set correct HTTP method")
+        #expect(request.url?.absoluteString == "https://api.example.com/users", "Should build correct URL")
+        #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer token", "Should add authorization header")
     }
     
     @Test("Create request with query items builds correct URL")
@@ -55,9 +54,8 @@ struct WebParkTests {
         
         let queryItems = [URLQueryItem(name: "limit", value: "10")]
         let request = try sut.createRequest("GET", endpoint: "/users", queryItems: queryItems)
-        let unwrappedRequest = try #require(request, "Should create a valid request")
-        
-        #expect(unwrappedRequest.url?.absoluteString.contains("limit=10") == true, "Should include query parameters")
+
+        #expect(request.url?.absoluteString.contains("limit=10") == true, "Should include query parameters")
     }
     
     @Test("Create request with JSON flag sets content type header")
@@ -68,7 +66,7 @@ struct WebParkTests {
         
         let request = try sut.createRequest("POST", endpoint: "/users", isJSON: true)
         
-        #expect(request?.value(forHTTPHeaderField: "Content-Type") == "application/json", "Should set JSON content type")
+        #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json", "Should set JSON content type")
     }
         
     // MARK: - Error Response Code Tests

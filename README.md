@@ -1,10 +1,10 @@
 # WebPark
 
-[![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)](https://swift.org)
+[![Swift](https://img.shields.io/badge/Swift-6.4-orange.svg)](https://swift.org)
 [![Platforms](https://img.shields.io/badge/Platforms-iOS%20|%20macOS%20|%20tvOS%20|%20watchOS-blue.svg)](https://developer.apple.com)
 [![SPM](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
-[![CI](https://github.com/YOUR_USERNAME/WebPark/workflows/CI/badge.svg)](https://github.com/YOUR_USERNAME/WebPark/actions)
+[![CI](https://github.com/LordLobo/WebPark/workflows/CI/badge.svg)](https://github.com/LordLobo/WebPark/actions)
 
 > REST that is a walk in the park! 🌳
 
@@ -14,7 +14,7 @@ WebPark is a lightweight, protocol-oriented Swift networking library that levera
 
 - ✨ **Type-safe**: Full generic support with Codable
 - ⚡️ **Modern**: Built with Swift 6 and async/await
-- 🔐 **Authentication**: Built-in bearer token support with automatic refresh
+- 🔐 **Authentication**: Built-in bearer token support
 - 🎯 **Simple API**: Protocol-based design with sensible defaults
 - 🧪 **Testable**: Includes mock URL protocol for easy testing
 - 🌍 **Cross-platform**: Supports iOS, macOS, tvOS, and watchOS
@@ -22,9 +22,9 @@ WebPark is a lightweight, protocol-oriented Swift networking library that levera
 
 ## Requirements
 
-- macOS 12.0+ / iOS 15.0+ / tvOS 15.0+ / watchOS 8.0+
-- Xcode 15.2+
-- Swift 6.2+
+- macOS 26.0+ / iOS 26.0+ / tvOS 26.0+ / watchOS 26.0+
+- Xcode 27.0+
+- Swift 6.4+
 
 ## Installation
 
@@ -34,13 +34,13 @@ Add WebPark to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/YOUR_USERNAME/WebPark.git", from: "0.2.0")
+    .package(url: "https://github.com/LordLobo/WebPark.git", from: "0.2.0")
 ]
 ```
 
 Or in Xcode:
 1. File → Add Package Dependencies
-2. Enter: `https://github.com/YOUR_USERNAME/WebPark.git`
+2. Enter: `https://github.com/LordLobo/WebPark.git`
 3. Select version and add to your target
 
 ## Quick Start
@@ -218,10 +218,21 @@ WebPark supports all common HTTP methods:
 | Method | Usage | Returns |
 |--------|-------|---------|
 | GET | `get(_:queryItems:)` | `T: Codable` |
-| POST | `post(_:body:)` | `T: Codable` |
-| PUT | `put(_:body:)` | `T: Codable` |
-| PATCH | `patch(_:body:)` | `T: Codable` |
+| POST | `post(_:body:)` | `T: Codable` or `Void` |
+| PUT | `put(_:body:)` | `T: Codable` or `Void` |
+| PATCH | `patch(_:body:)` | `T: Codable` or `Void` |
 | DELETE | `delete(_:queryItems:)` | `Void` |
+
+`post`, `put`, and `patch` each have a `Void` overload for endpoints that reply with no
+body, such as `204 No Content`. The overload is picked from the calling context:
+
+```swift
+// Decodes the response body.
+let created: User = try await post("/users", body: user)
+
+// Discards the response body — use this for 204 replies.
+try await post("/users/\(user.id)/touch", body: user)
+```
 
 ## Testing
 

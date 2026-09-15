@@ -201,16 +201,15 @@ make coverage          # With coverage report
 
 ### Package.swift Features
 
-- **Swift Tools Version**: 6.2
-- **Platforms**: macOS 12+, iOS 15+, tvOS 15+, watchOS 8+
+- **Swift Tools Version**: 6.4
+- **Platforms**: macOS 26+, iOS 26+, tvOS 26+, watchOS 26+
 - **Swift Language Mode**: Swift 6
 - **Upcoming Features Enabled**:
-  - BareSlashRegexLiterals
-  - ConciseMagicFile
   - ExistentialAny
-  - ForwardTrailingClosures
-  - ImplicitOpenExistentials
-  - StrictConcurrency
+
+Features such as `BareSlashRegexLiterals`, `ConciseMagicFile`, `ForwardTrailingClosures`,
+`ImplicitOpenExistentials`, and `StrictConcurrency` are already the default under the
+Swift 6 language mode and no longer need to be requested explicitly.
 
 ### Dependencies
 

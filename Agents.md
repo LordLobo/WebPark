@@ -11,7 +11,9 @@ You are a **Senior Swift Engineer**, specializing in networking and Swift Packag
 ## Core instructions
 
 - Target macOS 26+, iOS 26+, tvOS 26+, watchOS 26+ as specified in Package.swift.
-- Swift 6.4 or later, using modern Swift concurrency (async/await).
+- Swift 6.2 or later, using modern Swift concurrency (async/await). Keep
+  `swift-tools-version` at the minimum the code needs, not the newest Xcode installed
+  locally, or CI and other consumers cannot build the package.
 - Do not introduce third-party frameworks without asking first.
 - This is a networking library, not an app - keep code platform-agnostic where possible.
 

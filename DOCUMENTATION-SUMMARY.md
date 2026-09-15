@@ -50,7 +50,7 @@ We've completed enhancement #14 (Documentation) from your improvement list, tran
 - Added/Changed/Fixed sections
 
 #### Package.swift (Already existed)
-- Swift 6.4 support
+- Swift 6.2 support
 - Strict concurrency enabled
 - All platforms configured
 
@@ -308,7 +308,7 @@ Pull request template:
 ### Best Practices Demonstrated
 
 1. **Modern Swift**
-   - Swift 6.4 features
+   - Swift 6.2 features
    - Async/await throughout
    - Strict concurrency
    - No force unwraps

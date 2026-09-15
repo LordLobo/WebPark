@@ -23,6 +23,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   root path, so generated release notes were always empty.
 - Replaced `YOUR_USERNAME` placeholders in README links and badges, and dropped the
   placeholder `cname` from the documentation deploy job.
+- CI no longer pins Xcode. Every macOS job was failing with
+  `xcode-select: error: invalid developer directory '/Applications/Xcode_27.0.app'`, and the
+  workflow-level `DEVELOPER_DIR` broke even jobs with no Xcode-selection step.
+  GitHub's `macos-26` runners ship Xcode 26.0.1 through 26.6 and no 27; the jobs now use the
+  runner default, which is already the newest Xcode present.
+- `swift-tools-version` lowered from 6.4 back to 6.2, the minimum that provides the `.v26`
+  platform constants (`.v27` requires 6.4). Swift 6.4 ships only inside Xcode 27, which is
+  on no hosted runner and has no public Docker image, so requiring it made the package
+  unbuildable outside a local Xcode 27 install.
+- Linux CI container `swift:6.4` did not exist (`manifest unknown`); now `swift:6.3`, the
+  newest published tag.
 - The SwiftLint CI job now passes. It had been failing (56 violations at `532704a`), partly
   because of `.swiftlint.yml` itself:
   - Removed the `explicit_self_in_closures` custom rule. Its regex matched any `{`

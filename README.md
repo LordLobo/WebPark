@@ -1,6 +1,6 @@
 # WebPark
 
-[![Swift](https://img.shields.io/badge/Swift-6.4-orange.svg)](https://swift.org)
+[![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg)](https://swift.org)
 [![Platforms](https://img.shields.io/badge/Platforms-iOS%20|%20macOS%20|%20tvOS%20|%20watchOS-blue.svg)](https://developer.apple.com)
 [![SPM](https://img.shields.io/badge/SPM-compatible-brightgreen.svg)](https://swift.org/package-manager)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
@@ -23,8 +23,8 @@ WebPark is a lightweight, protocol-oriented Swift networking library that levera
 ## Requirements
 
 - macOS 26.0+ / iOS 26.0+ / tvOS 26.0+ / watchOS 26.0+
-- Xcode 27.0+
-- Swift 6.4+
+- Xcode 26.0+
+- Swift 6.2+
 
 ## Installation
 

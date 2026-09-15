@@ -201,7 +201,7 @@ make coverage          # With coverage report
 
 ### Package.swift Features
 
-- **Swift Tools Version**: 6.4
+- **Swift Tools Version**: 6.2 (minimum providing the `.v26` platform constants)
 - **Platforms**: macOS 26+, iOS 26+, tvOS 26+, watchOS 26+
 - **Swift Language Mode**: Swift 6
 - **Upcoming Features Enabled**:

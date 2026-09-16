@@ -30,6 +30,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Linux CI job is now build-only and renamed `Build Linux`. The test suite mocks HTTP
   through `URLSessionConfiguration.protocolClasses`, which swift-corelibs-foundation
   ignores, so running it on Linux would attempt real network calls rather than hit mocks.
+- Documentation artifacts are now tarred before upload. DocC emits filenames such as
+  `decode(_:).json`, and the artifact API rejects any path containing a colon, so the
+  upload failed after the docs had built successfully. The deploy job untars before
+  publishing. The iOS test-results upload is tarred for the same reason, since
+  `.xcresult` bundles hit the same restriction in the one step you need when a build fails.
+- All GitHub Actions bumped to their current `node24` majors, clearing the Node 20
+  deprecation warnings: `checkout@v4`→`v7`, `upload-artifact@v4`→`v7`,
+  `download-artifact@v4`→`v8`, `codecov-action@v4`→`v7`, `action-gh-release@v1`→`v3`.
+  `peaceiris/actions-gh-pages@v4` already runs on `node24`.
+- Codecov input renamed from `file` to `files`, which it requires after v4.
 - Documentation is now built with `xcodebuild docbuild` plus
   `docc process-archive transform-for-static-hosting`. The previous
   `swift package generate-documentation` required the swift-docc-plugin dependency, which

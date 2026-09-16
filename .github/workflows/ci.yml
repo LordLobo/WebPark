@@ -12,7 +12,7 @@ jobs:
     runs-on: macos-26
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       
       - name: Install SwiftLint
         run: brew install swiftlint
@@ -25,7 +25,7 @@ jobs:
     runs-on: macos-26
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       
       - name: Show Swift version
         run: swift --version
@@ -43,9 +43,10 @@ jobs:
             -instr-profile .build/debug/codecov/default.profdata > coverage.lcov
       
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         with:
-          file: ./coverage.lcov
+          # Renamed from `file` to `files` after v4.
+          files: ./coverage.lcov
           flags: macos
           fail_ci_if_error: false
 
@@ -59,7 +60,7 @@ jobs:
           - 'platform=iOS Simulator,OS=latest,name=iPad (A16)'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       
       - name: List available simulators
         run: xcrun simctl list devices available
@@ -72,19 +73,25 @@ jobs:
             -enableCodeCoverage YES \
             -derivedDataPath .build/ios-test
       
+      # Tarred for the same reason as the docs artifact: .xcresult bundles can contain
+      # paths the artifact API rejects, and this runs precisely when logs are needed.
+      - name: Package iOS test results
+        if: failure()
+        run: tar -czf ios-test-results.tar.gz -C .build/ios-test/Logs Test
+
       - name: Upload iOS test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: ios-test-results-${{ strategy.job-index }}
-          path: .build/ios-test/Logs/Test/*.xcresult
+          path: ios-test-results.tar.gz
 
   test-tvos:
     name: Test tvOS
     runs-on: macos-26
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       
       - name: Build and Test
         run: |
@@ -98,7 +105,7 @@ jobs:
     runs-on: macos-26
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       
       - name: Build
         run: |
@@ -116,7 +123,7 @@ jobs:
       image: swift:6.3
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Show Swift version
         run: swift --version
@@ -129,7 +136,7 @@ jobs:
     runs-on: macos-26
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       
       # Built with xcodebuild rather than `swift package generate-documentation`, which
       # needs the swift-docc-plugin package dependency. WebPark ships zero dependencies.
@@ -153,18 +160,23 @@ jobs:
             --output-path ./docs \
             --hosting-base-path WebPark
       
+      # DocC emits filenames such as `decode(_:).json`, and the artifact API rejects any
+      # path containing a colon. Uploading a single tarball side-steps the per-file check.
+      - name: Package documentation
+        run: tar -czf documentation.tar.gz -C ./docs .
+
       - name: Upload documentation artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: documentation
-          path: docs
+          path: documentation.tar.gz
 
   check-formatting:
     name: Check Code Formatting
     runs-on: macos-26
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       
       - name: Install swift-format
         run: brew install swift-format
@@ -179,7 +191,7 @@ jobs:
     runs-on: macos-26
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       
       - name: Run xcodebuild analyze
         run: |
@@ -194,7 +206,7 @@ jobs:
     runs-on: macos-26
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       
       - name: Validate Swift Package
         run: swift package dump-package
@@ -208,7 +220,7 @@ jobs:
     needs: [test-macos, test-ios]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       
       - name: Run integration tests
         run: |
@@ -225,14 +237,18 @@ jobs:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       
       - name: Download documentation
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: documentation
-          path: docs
-      
+
+      - name: Unpack documentation
+        run: |
+          mkdir -p docs
+          tar -xzf documentation.tar.gz -C docs
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -249,7 +265,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       
@@ -268,7 +284,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
       
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           name: Release ${{ steps.version.outputs.VERSION }}
           body: ${{ steps.changelog.outputs.CHANGELOG }}

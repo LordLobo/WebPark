@@ -3,6 +3,9 @@ name: CI
 on:
   push:
     branches: [ main, develop ]
+    # Required for the `release` job below. Without this, pushing a tag does not start the
+    # workflow at all, so `if: startsWith(github.ref, 'refs/tags/v')` can never be true.
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main, develop ]
 
@@ -276,12 +279,22 @@ jobs:
       - name: Extract changelog
         id: changelog
         run: |
-          # Extract the section for this version from CHANGELOG.md
-          VERSION=${{ steps.version.outputs.VERSION }}
-          CHANGELOG=$(awk "/## \[$VERSION\]/,/## \[/{if(/## \[/&&++c==2)exit;if(c==1)print}" CHANGELOG.md)
-          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          # Print the body of the `## [VERSION]` section, stopping at the next `## [`.
+          # A naive `/## \[$VERSION\]/,/## \[/` range collapses to a single line, because
+          # the opening line also matches the closing pattern.
+          VERSION='${{ steps.version.outputs.VERSION }}'
+          CHANGELOG=$(awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { inside = 1; next }
+            inside && /^## \[/ { exit }
+            inside { print }
+          ' CHANGELOG.md)
+          if [ -z "$(printf '%s' "$CHANGELOG" | tr -d '[:space:]')" ]; then
+            echo "No CHANGELOG.md section found for version $VERSION" >&2
+            exit 1
+          fi
+          echo "CHANGELOG<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$CHANGELOG" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
       
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v3

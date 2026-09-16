@@ -99,10 +99,16 @@ install-tools:
 ## release: Prepare for release (run all checks)
 release: clean check
 	@echo "🚀 Ready for release!"
-	@echo "Don't forget to:"
-	@echo "  1. Update CHANGELOG.md"
-	@echo "  2. Bump version in relevant files"
-	@echo "  3. Run: ./scripts/tag-release.sh <version>"
+	@echo "Next: make tag-release VERSION=<x.y.z>"
+	@echo "Add PROMOTE=1 to rename the CHANGELOG.md '## [Unreleased]' heading for you."
+
+## tag-release: Tag and push a release (VERSION=x.y.z [PROMOTE=1])
+tag-release:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "❌ VERSION is required. Example: make tag-release VERSION=0.3.0"; \
+		exit 1; \
+	fi
+	@./scripts/tag-release.sh $(VERSION) $(if $(PROMOTE),--promote,)
 
 ## help: Show this help message
 help:

@@ -30,6 +30,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Linux CI job is now build-only and renamed `Build Linux`. The test suite mocks HTTP
   through `URLSessionConfiguration.protocolClasses`, which swift-corelibs-foundation
   ignores, so running it on Linux would attempt real network calls rather than hit mocks.
+- Release automation now actually runs. The workflow only triggered on pushes to `main` and
+  `develop`, never on tags, so the `release` job's `if: startsWith(github.ref, 'refs/tags/v')`
+  could never be true and no GitHub Release was ever created. Added `tags: [ 'v*' ]`.
+- Fixed release-note extraction in both `scripts/tag-release.sh` and the `release` job. The
+  awk range `/## \[$VERSION\]/,/## \[/` collapses to one line, because the opening line also
+  matches the closing pattern, so release notes contained only the bare heading. Both now
+  print the section body and fail loudly if it is empty.
+- `scripts/tag-release.sh` resolves a usable toolchain when `xcode-select` points at the
+  Command Line Tools, where `swift test` cannot load the Swift Testing macro plugin and
+  SwiftLint cannot dlopen sourcekitd. It also lints with `--strict` to match CI, checks the
+  remote for an existing tag, and no longer tells you to create the GitHub Release by hand.
+- Added `scripts/tag-release.sh --promote` and `make tag-release VERSION=x.y.z [PROMOTE=1]`
+  to rename the `## [Unreleased]` heading to the release version. Nothing is written or
+  pushed until after the test and lint gates pass and the confirmation prompt is answered.
 - Documentation artifacts are now tarred before upload. DocC emits filenames such as
   `decode(_:).json`, and the artifact API rejects any path containing a colon, so the
   upload failed after the docs had built successfully. The deploy job untars before

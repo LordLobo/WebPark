@@ -130,37 +130,28 @@ fi
 print_info "Pulling latest changes..."
 git pull --ff-only origin "$CURRENT_BRANCH"
 
-# Check if CHANGELOG.md has an entry for this version, optionally promoting Unreleased
+# Fail fast if there are no release notes to publish. The actual CHANGELOG.md edit happens
+# after the test and lint gates, so a failing run never leaves a stray commit behind.
 print_info "Checking CHANGELOG.md..."
+NEEDS_PROMOTION=false
 if ! grep -q "^## \[${VERSION}\]" CHANGELOG.md; then
-    if [ "$PROMOTE" = true ] && grep -q "^## \[Unreleased\]" CHANGELOG.md; then
-        if [ -z "$(changelog_section Unreleased | tr -d '[:space:]')" ]; then
-            print_error "## [Unreleased] exists but is empty; nothing to release."
-            exit 1
-        fi
-
-        TODAY=$(date +%Y-%m-%d)
-        print_info "Promoting ## [Unreleased] to ## [${VERSION}] - ${TODAY}"
-        # BSD and GNU sed disagree on -i, so write through a temp file instead.
-        sed "s/^## \[Unreleased\]$/## [${VERSION}] - ${TODAY}/" CHANGELOG.md > CHANGELOG.md.tmp
-        mv CHANGELOG.md.tmp CHANGELOG.md
-
-        git add CHANGELOG.md
-        git commit -m "Release ${VERSION}"
-        print_info "Committed CHANGELOG.md promotion"
-    else
+    if [ "$PROMOTE" != true ]; then
         print_error "CHANGELOG.md does not contain an entry for version ${VERSION}"
         print_info "Either add a '## [${VERSION}]' section, or rerun with --promote to"
         print_info "rename the existing '## [Unreleased]' heading to this version."
         exit 1
     fi
-fi
-
-# Extract changelog entry for this version
-print_info "Extracting changelog for ${VERSION}..."
-CHANGELOG_ENTRY=$(changelog_section "$VERSION")
-
-if [ -z "$(printf '%s' "$CHANGELOG_ENTRY" | tr -d '[:space:]')" ]; then
+    if ! grep -q "^## \[Unreleased\]" CHANGELOG.md; then
+        print_error "--promote was given but CHANGELOG.md has no '## [Unreleased]' heading"
+        exit 1
+    fi
+    if [ -z "$(changelog_section Unreleased | tr -d '[:space:]')" ]; then
+        print_error "## [Unreleased] exists but is empty; nothing to release."
+        exit 1
+    fi
+    NEEDS_PROMOTION=true
+    print_info "## [Unreleased] will become ## [${VERSION}] once the checks pass"
+elif [ -z "$(changelog_section "$VERSION" | tr -d '[:space:]')" ]; then
     print_error "The '## [${VERSION}]' section in CHANGELOG.md is empty"
     exit 1
 fi
@@ -187,13 +178,28 @@ else
     print_warning "SwiftLint not found. Skipping lint check."
 fi
 
+# Read the notes that will become the release body. Until promotion happens they are
+# still under the Unreleased heading.
+if [ "$NEEDS_PROMOTION" = true ]; then
+    CHANGELOG_ENTRY=$(changelog_section Unreleased)
+else
+    CHANGELOG_ENTRY=$(changelog_section "$VERSION")
+fi
+if [ -z "$(printf '%s' "$CHANGELOG_ENTRY" | tr -d '[:space:]')" ]; then
+    print_error "Could not extract release notes for ${VERSION} from CHANGELOG.md"
+    exit 1
+fi
+
 # Show the changelog entry
 print_info "Changelog entry for ${VERSION}:"
 echo "---"
 echo "$CHANGELOG_ENTRY"
 echo "---"
 
-# Confirm release
+# Confirm release. Nothing above this point has modified the repository.
+if [ "$NEEDS_PROMOTION" = true ]; then
+    print_info "This will rewrite the CHANGELOG.md heading, commit, and push ${CURRENT_BRANCH}."
+fi
 read -p "Do you want to create and push tag ${TAG_NAME}? (y/n) " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -201,8 +207,15 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 0
 fi
 
-# If --promote created a commit, it needs to reach the remote before the tag.
-if [ "$PROMOTE" = true ]; then
+# Confirmed, so it is now safe to rewrite CHANGELOG.md and push.
+if [ "$NEEDS_PROMOTION" = true ]; then
+    TODAY=$(date +%Y-%m-%d)
+    print_info "Promoting ## [Unreleased] to ## [${VERSION}] - ${TODAY}"
+    # BSD and GNU sed disagree on -i, so write through a temp file instead.
+    sed "s/^## \[Unreleased\]\$/## [${VERSION}] - ${TODAY}/" CHANGELOG.md > CHANGELOG.md.tmp
+    mv CHANGELOG.md.tmp CHANGELOG.md
+    git add CHANGELOG.md
+    git commit -m "Release ${VERSION}"
     print_info "Pushing ${CURRENT_BRANCH}..."
     git push origin "$CURRENT_BRANCH"
 fi

@@ -6,6 +6,10 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+// On Linux, URLRequest lives in FoundationNetworking rather than Foundation.
+import FoundationNetworking
+#endif
 
 public extension URLRequest {
     func addingBearerAuthorization(token: String) -> URLRequest {

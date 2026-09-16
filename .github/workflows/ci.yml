@@ -106,23 +106,23 @@ jobs:
             -scheme WebPark \
             -destination 'platform=watchOS Simulator,OS=latest,name=Apple Watch Series 11 (46mm)'
 
-  test-linux:
-    name: Test Linux
+  build-linux:
+    # Compile-portability check only. The test suite mocks HTTP by installing a custom
+    # URLProtocol via URLSessionConfiguration.protocolClasses, which swift-corelibs-foundation
+    # ignores, so the tests would compile on Linux and then attempt real network calls.
+    name: Build Linux
     runs-on: ubuntu-latest
     container:
       image: swift:6.3
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Show Swift version
         run: swift --version
-      
+
       - name: Build
         run: swift build -v
-      
-      - name: Run tests
-        run: swift test -v
 
   build-documentation:
     name: Build Documentation
@@ -131,14 +131,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Build DocC Documentation
+      # Built with xcodebuild rather than `swift package generate-documentation`, which
+      # needs the swift-docc-plugin package dependency. WebPark ships zero dependencies.
+      - name: Build DocC archive
         run: |
-          swift package \
-            --allow-writing-to-directory ./docs \
-            generate-documentation \
-            --target WebPark \
+          xcodebuild docbuild \
+            -scheme WebPark \
+            -destination 'platform=macOS' \
+            -derivedDataPath .build/docbuild
+
+      - name: Transform archive for static hosting
+        run: |
+          ARCHIVE=$(find .build/docbuild -type d -name 'WebPark.doccarchive' | head -1)
+          if [ -z "$ARCHIVE" ]; then
+            echo "No .doccarchive produced by xcodebuild docbuild" >&2
+            exit 1
+          fi
+          echo "Transforming $ARCHIVE"
+          xcrun docc process-archive transform-for-static-hosting \
+            "$ARCHIVE" \
             --output-path ./docs \
-            --transform-for-static-hosting \
             --hosting-base-path WebPark
       
       - name: Upload documentation artifact
@@ -232,7 +244,7 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [test-macos, test-ios, test-tvos, test-watchos, test-linux]
+    needs: [test-macos, test-ios, test-tvos, test-watchos, build-linux]
     permissions:
       contents: write
     steps:

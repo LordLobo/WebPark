@@ -23,6 +23,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   root path, so generated release notes were always empty.
 - Replaced `YOUR_USERNAME` placeholders in README links and badges, and dropped the
   placeholder `cname` from the documentation deploy job.
+- The library now compiles on Linux. `URLSession` and `URLRequest` live in
+  `FoundationNetworking` there, not `Foundation`, so `Sources/WebPark/WebPark.swift` and
+  `util/URLRequestExtensions.swift` now carry a `#if canImport(FoundationNetworking)`
+  guard. The Linux CI job had never passed.
+- The Linux CI job is now build-only and renamed `Build Linux`. The test suite mocks HTTP
+  through `URLSessionConfiguration.protocolClasses`, which swift-corelibs-foundation
+  ignores, so running it on Linux would attempt real network calls rather than hit mocks.
+- Documentation is now built with `xcodebuild docbuild` plus
+  `docc process-archive transform-for-static-hosting`. The previous
+  `swift package generate-documentation` required the swift-docc-plugin dependency, which
+  the package does not declare, so the job failed with
+  `Unknown subcommand or plugin name 'generate-documentation'` (exit 64). Building through
+  xcodebuild keeps WebPark dependency-free.
 - CI no longer pins Xcode. Every macOS job was failing with
   `xcode-select: error: invalid developer directory '/Applications/Xcode_27.0.app'`, and the
   workflow-level `DEVELOPER_DIR` broke even jobs with no Xcode-selection step.

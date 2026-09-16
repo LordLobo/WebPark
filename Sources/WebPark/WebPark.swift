@@ -6,6 +6,10 @@
 //
 
 import Foundation
+#if canImport(FoundationNetworking)
+// On Linux, URLSession and URLRequest live in FoundationNetworking rather than Foundation.
+import FoundationNetworking
+#endif
 
 
 /**

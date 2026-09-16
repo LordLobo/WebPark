@@ -123,25 +123,29 @@ extension MyAPIClient {
 
 Implement `WebParkTokenServiceProtocol` for authenticated requests:
 
+`WebParkTokenServiceProtocol.token` is synchronous, so the token must be readable without
+`await`. That rules out an `actor`, whose isolated properties are only reachable
+asynchronously; use a type that synchronises internally instead.
+
 ```swift
-actor TokenService: WebParkTokenServiceProtocol {
-    private var _token: String
-    
-    var token: String {
-        get async { _token }
-    }
-    
+final class TokenService: WebParkTokenServiceProtocol, @unchecked Sendable {
+    private let lock = NSLock()
+    private var storedToken: String
+
     init(token: String) {
-        self._token = token
+        self.storedToken = token
     }
-    
+
+    var token: String {
+        lock.withLock { storedToken }
+    }
+
     func refreshToken() async throws {
-        // Your token refresh logic here
-        // e.g., call refresh endpoint, update _token
+        // Your token refresh logic here, e.g. call a refresh endpoint.
         let newToken = try await performTokenRefresh()
-        _token = newToken
+        lock.withLock { storedToken = newToken }
     }
-    
+
     private func performTokenRefresh() async throws -> String {
         // Implementation details
         return "new_token_value"
@@ -150,13 +154,16 @@ actor TokenService: WebParkTokenServiceProtocol {
 
 struct AuthenticatedAPIClient: WebPark {
     let baseURL = "https://api.example.com"
-    let tokenService: WebParkTokenServiceProtocol?
-    
-    init(tokenService: WebParkTokenServiceProtocol) {
+    let tokenService: (any WebParkTokenServiceProtocol)?
+
+    init(tokenService: any WebParkTokenServiceProtocol) {
         self.tokenService = tokenService
     }
 }
 ```
+
+> **Note:** WebPark does not refresh tokens for you. A `401` surfaces as
+> `WebParkHttpError`; call `refreshToken()` and retry from your own code.
 
 ### Custom URLSession
 

@@ -5,6 +5,30 @@ All notable changes to WebPark will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- Conforming to `WebPark` from outside the module now works. The default `urlSession`
+  witness lived in a non-`public` extension, so it was invisible across a module boundary
+  and every external conformance failed with "does not conform to protocol 'WebPark'" —
+  including the README's own Quick Start snippet. The defaults are now in a `public
+  extension`, and `tokenService` gained a `nil` default so unauthenticated clients can omit
+  it. Shipped broken in 0.3.0.
+- Corrected the README Authentication example. It declared an `actor` whose
+  `var token: String { get async }` cannot satisfy `WebParkTokenServiceProtocol`'s
+  synchronous requirement ("candidate is 'async', but protocol requirement is not"), so it
+  never compiled. Replaced with a lock-based `final class` and a note explaining why an
+  actor does not fit.
+- Coverage generation no longer hardcodes `WebParkPackageTests.xctest`. Bundle layout
+  varies by toolchain, and adding a test target would have broken the step; it now
+  discovers bundles under `swift build --show-bin-path`.
+
+### Added
+- `WebParkConsumerTests` target, which imports WebPark without `@testable` so the public
+  API is exercised across a real module boundary. The existing suite could not catch the
+  conformance bug above: it uses `@testable import` and its fixture declares every property
+  explicitly. Verified this target fails to compile when the fix is reverted.
+
 ## [0.3.0] - 2026-09-16
 
 ### Fixed

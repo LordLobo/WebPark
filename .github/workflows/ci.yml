@@ -39,11 +39,40 @@ jobs:
       - name: Run tests
         run: swift test -v --enable-code-coverage
       
+      # Bundle layout differs by toolchain: older SwiftPM merges every test target into one
+      # WebParkPackageTests.xctest, while newer builds emit one bundle per target. Discover
+      # them instead of hardcoding a name, so adding a test target cannot break coverage.
       - name: Generate coverage report
         run: |
+          BIN=$(swift build --show-bin-path)
+          PROFDATA="$BIN/codecov/default.profdata"
+          if [ ! -f "$PROFDATA" ]; then
+            echo "No profdata at $PROFDATA" >&2
+            exit 1
+          fi
+
+          ARGS=()
+          while IFS= read -r bundle; do
+            name=$(basename "$bundle" .xctest)
+            binary="$bundle/Contents/MacOS/$name"
+            [ -f "$binary" ] || continue
+            if [ ${#ARGS[@]} -eq 0 ]; then
+              ARGS+=("$binary")
+            else
+              ARGS+=(-object "$binary")
+            fi
+          done < <(find "$BIN" -maxdepth 1 -name '*.xctest')
+
+          if [ ${#ARGS[@]} -eq 0 ]; then
+            echo "Found no .xctest bundles under $BIN" >&2
+            exit 1
+          fi
+          echo "Covering: ${ARGS[*]}"
+
           xcrun llvm-cov export -format="lcov" \
-            .build/debug/WebParkPackageTests.xctest/Contents/MacOS/WebParkPackageTests \
-            -instr-profile .build/debug/codecov/default.profdata > coverage.lcov
+            "${ARGS[@]}" \
+            -instr-profile "$PROFDATA" > coverage.lcov
+          echo "coverage.lcov lines: $(wc -l < coverage.lcov)"
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v7

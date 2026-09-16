@@ -33,7 +33,9 @@ public protocol WebPark {
     /// or testing with mocked sessions).
     var urlSession: URLSession { get }
     
-    /// Optional token service used to attach and refresh a bearer token for authenticated requests.
+    /// Optional token service used to attach a bearer token to authenticated requests.
+    ///
+    /// A default implementation returns `nil`, so unauthenticated clients can omit this.
     ///
     /// When present, `createRequest(_:endpoint:queryItems:isJSON:)` automatically adds an
     /// `Authorization: Bearer <token>` header using `tokenService.token`.
@@ -61,9 +63,16 @@ public protocol WebParkAsyncTokenServiceProtocol: Sendable {
     var isAuthenticated: Bool { get async }
 }
 
-extension WebPark {
+// Default witnesses for the optional requirements. These must be `public`: the witness for a
+// public protocol requirement has to be at least as visible as the protocol, or conformances
+// declared outside this module cannot see it and fail to compile.
+public extension WebPark {
     var urlSession: URLSession { URLSession.shared }
-    
+
+    var tokenService: (any WebParkTokenServiceProtocol)? { nil }
+}
+
+extension WebPark {
     /// Builds a request for `endpoint`, attaching a bearer token and JSON content type as configured.
     ///
     /// Every failure path throws a `WebParkError`, so a returned request is always usable.

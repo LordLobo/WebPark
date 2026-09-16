@@ -34,6 +34,17 @@ let package = Package(
                 .enableUpcomingFeature("ExistentialAny"),
             ]
         ),
+        // Deliberately separate from WebParkTests, which uses `@testable import` and so can
+        // see internal symbols. This target imports WebPark the way a real consumer does,
+        // which is the only way to catch a public requirement whose default witness is not
+        // itself public.
+        .testTarget(
+            name: "WebParkConsumerTests",
+            dependencies: ["WebPark"],
+            swiftSettings: [
+                .enableUpcomingFeature("ExistentialAny"),
+            ]
+        ),
     ],
     swiftLanguageModes: [.v6]
 )
